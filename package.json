@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/carynbear/cordova-lib/tree/decouple"
+    "url": "https://github.com/carynbear/cordova-create.git"
   },
   "keywords": [
     "cordova",
@@ -14,7 +14,7 @@
     "ecosystem:cordova",
     "cordova:tool"
   ],
-  "author": "Caryn Tran",
+  "author": "Apache Software Foundation",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://issues.apache.org/jira/browse/CB",
@@ -41,5 +41,11 @@
     "test": "npm run jshint && npm run jasmine",
     "jshint": "jshint index.js spec/create.spec.js",
     "jasmine": "jasmine-node spec/create.spec.js"
-  }
+  },
+  "contributors": [
+    {
+      "name": "Caryn Tran",
+      "email": "caryn.tran@berkeley.edu"
+    }
+  ]
 }
