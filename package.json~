@@ -1,0 +1,45 @@
+{
+  "name": "cordova-create",
+  "version": "0.1.0",
+  "description": "Apache Cordova create module. Creates new project from default or template",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/carynbear/cordova-lib/tree/decouple"
+  },
+  "keywords": [
+    "cordova",
+    "create",
+    "apache",
+    "ecosystem:cordova",
+    "cordova:tool"
+  ],
+  "author": "Apache Software Foundation",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://issues.apache.org/jira/browse/CB",
+    "email": "dev@cordova.apache.org"
+  },
+  "engines": {
+    "node": ">=0.9.9"
+  },
+  "engineStrict": true,
+  "dependencies": {
+    "cordova-app-hello-world": "3.10.0",
+    "cordova-common": "1.3.x",
+    "cordova-fetch": "1.0.0",
+    "npm": "^2.10.x",
+    "q": "1.0.1",
+    "shelljs": "0.3.0",
+    "valid-identifier": "0.0.1"
+  },
+  "devDependencies": {
+    "jasmine-node": "1.14.5",
+    "jshint": "2.5.8"
+  },
+  "scripts": {
+    "test": "npm run jshint && npm run jasmine",
+    "jshint": "jshint index.js spec/create.spec.js",
+    "jasmine": "jasmine-node spec/create.spec.js"
+  }
+}

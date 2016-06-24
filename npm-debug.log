@@ -1,0 +1,125 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/ctran/.nvm/versions/node/v5.11.1/bin/node',
+1 verbose cli   '/Users/ctran/.nvm/versions/node/v5.11.1/bin/npm',
+1 verbose cli   'publish' ]
+2 info using npm@3.9.2
+3 info using node@v5.11.1
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: '/Users/ctran/cordova/cordova-lib/cordova-create',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory /Users/ctran/.npm/cordova-create/0.1.0/package.tgz not in flight; packing
+9 verbose correctMkdir /Users/ctran/.npm correctMkdir not in flight; initializing
+10 info lifecycle cordova-create@0.1.0~prepublish: cordova-create@0.1.0
+11 silly lifecycle cordova-create@0.1.0~prepublish: no script for prepublish, continuing
+12 verbose tar pack [ '/Users/ctran/.npm/cordova-create/0.1.0/package.tgz',
+12 verbose tar pack   '/Users/ctran/cordova/cordova-lib/cordova-create' ]
+13 verbose tarball /Users/ctran/.npm/cordova-create/0.1.0/package.tgz
+14 verbose folder /Users/ctran/cordova/cordova-lib/cordova-create
+15 verbose addLocalTarball adding from inside cache /Users/ctran/.npm/cordova-create/0.1.0/package.tgz
+16 verbose correctMkdir /Users/ctran/.npm correctMkdir not in flight; initializing
+17 silly cache afterAdd cordova-create@0.1.0
+18 verbose afterAdd /Users/ctran/.npm/cordova-create/0.1.0/package/package.json not in flight; writing
+19 verbose correctMkdir /Users/ctran/.npm correctMkdir not in flight; initializing
+20 verbose afterAdd /Users/ctran/.npm/cordova-create/0.1.0/package/package.json written
+21 silly publish { name: 'cordova-create',
+21 silly publish   version: '0.1.0',
+21 silly publish   description: 'Apache Cordova create module. Creates new project from default or template',
+21 silly publish   main: 'index.js',
+21 silly publish   repository:
+21 silly publish    { type: 'git',
+21 silly publish      url: 'https://github.com/carynbear/cordova-lib/tree/decouple' },
+21 silly publish   keywords:
+21 silly publish    [ 'cordova',
+21 silly publish      'create',
+21 silly publish      'apache',
+21 silly publish      'ecosystem:cordova',
+21 silly publish      'cordova:tool' ],
+21 silly publish   author: { name: 'Caryn Tran' },
+21 silly publish   license: 'Apache-2.0',
+21 silly publish   bugs:
+21 silly publish    { url: 'https://issues.apache.org/jira/browse/CB',
+21 silly publish      email: 'dev@cordova.apache.org' },
+21 silly publish   engines: { node: '>=0.9.9' },
+21 silly publish   engineStrict: true,
+21 silly publish   dependencies:
+21 silly publish    { 'cordova-app-hello-world': '3.10.0',
+21 silly publish      'cordova-common': '1.3.x',
+21 silly publish      'cordova-fetch': '1.0.0',
+21 silly publish      npm: '^2.10.x',
+21 silly publish      q: '1.0.1',
+21 silly publish      shelljs: '0.3.0',
+21 silly publish      'valid-identifier': '0.0.1' },
+21 silly publish   devDependencies: { 'jasmine-node': '1.14.5', jshint: '2.5.8' },
+21 silly publish   scripts:
+21 silly publish    { test: 'npm run jshint && npm run jasmine',
+21 silly publish      jshint: 'jshint index.js spec/create.spec.js',
+21 silly publish      jasmine: 'jasmine-node spec/create.spec.js' },
+21 silly publish   readme: 'ERROR: No README data found!',
+21 silly publish   _id: 'cordova-create@0.1.0',
+21 silly publish   _shasum: '1295f83c54b8cbeac3afb6007aede05b00ce6744',
+21 silly publish   _from: '.' }
+22 verbose getPublishConfig undefined
+23 silly mapToRegistry name cordova-create
+24 silly mapToRegistry using default registry
+25 silly mapToRegistry registry https://registry.npmjs.org/
+26 silly mapToRegistry data Result {
+26 silly mapToRegistry   raw: 'cordova-create',
+26 silly mapToRegistry   scope: null,
+26 silly mapToRegistry   name: 'cordova-create',
+26 silly mapToRegistry   rawSpec: '',
+26 silly mapToRegistry   spec: 'latest',
+26 silly mapToRegistry   type: 'tag' }
+27 silly mapToRegistry uri https://registry.npmjs.org/cordova-create
+28 verbose publish registryBase https://registry.npmjs.org/
+29 silly publish uploading /Users/ctran/.npm/cordova-create/0.1.0/package.tgz
+30 verbose request uri https://registry.npmjs.org/cordova-create
+31 verbose request sending authorization for write operation
+32 info attempt registry request try #1 at 4:43:02 PM
+33 verbose request using bearer token for auth
+34 verbose request id d8b75c007157a407
+35 http request PUT https://registry.npmjs.org/cordova-create
+36 http 403 https://registry.npmjs.org/cordova-create
+37 verbose headers { 'content-type': 'application/json',
+37 verbose headers   'cache-control': 'max-age=300',
+37 verbose headers   'content-length': '108',
+37 verbose headers   'accept-ranges': 'bytes',
+37 verbose headers   date: 'Fri, 24 Jun 2016 23:43:09 GMT',
+37 verbose headers   via: '1.1 varnish',
+37 verbose headers   connection: 'keep-alive',
+37 verbose headers   'x-served-by': 'cache-sjc3127-SJC',
+37 verbose headers   'x-cache': 'MISS',
+37 verbose headers   'x-cache-hits': '0',
+37 verbose headers   'x-timer': 'S1466811789.753127,VS0,VE126',
+37 verbose headers   vary: 'Accept-Encoding' }
+38 verbose request invalidating /Users/ctran/.npm/registry.npmjs.org/cordova-create on PUT
+39 error publish Failed PUT 403
+40 verbose stack Error: you do not have permission to publish "cordova-create". Are you logged in as the correct user? : cordova-create
+40 verbose stack     at makeError (/Users/ctran/.nvm/versions/node/v5.11.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+40 verbose stack     at CachingRegistryClient.<anonymous> (/Users/ctran/.nvm/versions/node/v5.11.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:252:14)
+40 verbose stack     at Request._callback (/Users/ctran/.nvm/versions/node/v5.11.1/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:172:14)
+40 verbose stack     at Request.self.callback (/Users/ctran/.nvm/versions/node/v5.11.1/lib/node_modules/npm/node_modules/request/request.js:200:22)
+40 verbose stack     at emitTwo (events.js:100:13)
+40 verbose stack     at Request.emit (events.js:185:7)
+40 verbose stack     at Request.<anonymous> (/Users/ctran/.nvm/versions/node/v5.11.1/lib/node_modules/npm/node_modules/request/request.js:1067:10)
+40 verbose stack     at emitOne (events.js:95:20)
+40 verbose stack     at Request.emit (events.js:182:7)
+40 verbose stack     at IncomingMessage.<anonymous> (/Users/ctran/.nvm/versions/node/v5.11.1/lib/node_modules/npm/node_modules/request/request.js:988:12)
+41 verbose statusCode 403
+42 verbose pkgid cordova-create
+43 verbose cwd /Users/ctran/cordova/cordova-lib/cordova-create
+44 error Darwin 15.3.0
+45 error argv "/Users/ctran/.nvm/versions/node/v5.11.1/bin/node" "/Users/ctran/.nvm/versions/node/v5.11.1/bin/npm" "publish"
+46 error node v5.11.1
+47 error npm  v3.9.2
+48 error code E403
+49 error you do not have permission to publish "cordova-create". Are you logged in as the correct user? : cordova-create
+50 error If you need help, you may report this error at:
+50 error     <https://github.com/npm/npm/issues>
+51 verbose exit [ 1, true ]
