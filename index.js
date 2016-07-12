@@ -26,7 +26,8 @@ var path          = require('path'),
     ConfigParser  = require('cordova-common').ConfigParser,
     fetch         = require('cordova-fetch'),
     url           = require('url'),
-    validateIdentifier = require('valid-identifier');
+    validateIdentifier = require('valid-identifier'),
+    CordovaLogger = require('cordova-common').CordovaLogger.get();
 
 // Global configuration paths
 var global_config_path = process.env.CORDOVA_HOME;
@@ -34,27 +35,40 @@ if (!global_config_path) {
     var HOME = process.env[(process.platform.slice(0, 3) == 'win') ? 'USERPROFILE' : 'HOME'];
     global_config_path = path.join(HOME, '.cordova');
 }
+/**
+ * Sets up to forward events to another instance, or log console.
+ * This will make the create internal events visible outside
+ * @param  {EventEmitter} externalEventEmitter An EventEmitter instance that will be used for
+ *   logging purposes. If no EventEmitter provided, all events will be logged to console
+ * @return {EventEmitter} 
+ */
+function setupEvents(externalEventEmitter) {
+    if (externalEventEmitter) {
+        // This will make the platform internal events visible outside
+        events.forwardEventsTo(externalEventEmitter);
+        return externalEventEmitter;
+    }
+    // There is no logger if external emitter is not present,
+    // so attach a console logger
+    CordovaLogger.subscribe(events);
+    return events;
+}
+
 
 /**
  * Usage:
  * @dir - directory where the project will be created. Required.
- * @optionalId - app id. Optional.
- * @optionalName - app name. Optional.
- * @cfg - extra config to be saved in .cordova/config.json
+ * @optionalId - app id. Required (but be "undefined")
+ * @optionalName - app name. Required (but can be "undefined"). 
+ * @cfg - extra config to be saved in .cordova/config.json Required (but can be "{}").
+ * @extEvents - An EventEmitter instance that will be used for logging purposes. Required (but can be "undefined"). 
  **/
 // Returns a promise.
-module.exports = function(dir, optionalId, optionalName, cfg) {
+module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
     var argumentCount = arguments.length;
     return Q.fcall(function() {
-        // Lets check prerequisites first; NOTE: argCount is always 4 when run with cli
-        if (argumentCount == 3) {
-          cfg = optionalName;
-          optionalName = undefined;
-        } else if (argumentCount == 2) {
-          cfg = optionalId;
-          optionalId = undefined;
-          optionalName = undefined;
-        }
+        events = setupEvents(extEvents);
+        events.emit('warn', 'Using detached cordova-create');
 
         if (!dir) {
             throw new CordovaError('Directory not specified. See `cordova help`.');
