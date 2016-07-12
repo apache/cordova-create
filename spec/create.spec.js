@@ -23,7 +23,8 @@ var helpers = require('./helpers'),
     Q = require('q'),
     events = require('cordova-common').events,
     ConfigParser = require('cordova-common').ConfigParser,
-    create = require('../index');
+    create = require('../index'),
+    CordovaLogger = require('cordova-common').CordovaLogger.get().setLevel('error');
 
 var tmpDir = helpers.tmpDir('create_test');
 var appName = 'TestBase';
@@ -137,12 +138,12 @@ describe('create end-to-end', function() {
 
         // Check if www files exist.
         expect(path.join(project, 'www', 'index.html')).toExist();
-        var configXml = new ConfigParser(path.join(project, 'www', 'config.xml'));
+        var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.version()).toEqual('1.0.0');
 
-        // Check that config.xml does not exist outside of www
-        expect(path.join(project, 'config.xml')).not.toExist();
+        // Check that config.xml does not exist inside of www
+        expect(path.join(project, 'www', 'config.xml')).not.toExist();
 
         // Check that we got no package.json
         expect(path.join(project, 'package.json')).not.toExist();
@@ -309,7 +310,7 @@ describe('create end-to-end', function() {
             .fin(done);
     });
 
-    it('should successfully run config.xml in the www folder', function(done) {
+    it('should successfully run config.xml in the www folder and move it outside', function(done) {
         // Call cordova create with no args, should return help.
         var config = configConfigInWww;
         Q()
@@ -348,6 +349,5 @@ describe('create end-to-end', function() {
             })
             .fin(done);
     });
-
 
 });
