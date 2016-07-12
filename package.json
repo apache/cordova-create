@@ -1,6 +1,6 @@
 {
   "name": "cordova-create",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Apache Cordova create module. Creates new project from default or template",
   "main": "index.js",
   "repository": {
