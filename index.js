@@ -41,20 +41,23 @@ if (!global_config_path) {
  * @param  {EventEmitter} externalEventEmitter An EventEmitter instance that will be used for
  *   logging purposes. If no EventEmitter provided, all events will be logged to console
  * @return {EventEmitter} 
- */
+ */ 
 function setupEvents(externalEventEmitter) {
     if (externalEventEmitter) {
         // This will make the platform internal events visible outside
         events.forwardEventsTo(externalEventEmitter);
-        return externalEventEmitter;
     }
     // There is no logger if external emitter is not present,
     // so attach a console logger
-    CordovaLogger.subscribe(events);
+    else { 
+        CordovaLogger.subscribe(events);
+    }
     return events;
 }
 
-
+function cleanupEvents() {
+    events.removeAllListeners();
+}
 /**
  * Usage:
  * @dir - directory where the project will be created. Required.
@@ -164,8 +167,7 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
     .then(function() {
         // Finally, Ready to start!
         events.emit('log', 'Creating a new cordova project.');
-    })
-    .then(function() {
+
         // Strip link and url from cfg to avoid them being persisted to disk via .cordova/config.json.
         // TODO: apparently underscore has no deep clone.  Replace with lodash or something. For now, abuse JSON.
         var cfgToPersistToDisk = JSON.parse(JSON.stringify(cfg));
@@ -284,6 +286,8 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         if (cfg.name) conf.setName(cfg.name);
         conf.setVersion('1.0.0');
         conf.write();
+    }).then(function(){
+        cleanupEvents();
     });
 };
 
@@ -345,7 +349,7 @@ function isUrl(value) {
 
 /**
  * Find config file in project directory or www directory
- * 
+ * If file is in www directory, move it outside
  * @param  {String} project directory to be searched
  * @return {String or False} location of config file; if none exists, returns false
  */
@@ -355,6 +359,7 @@ function projectConfig(projectDir) {
     if (fs.existsSync(rootPath)) {
         return rootPath;
     } else if (fs.existsSync(wwwPath)) {
+        fs.renameSync(wwwPath, rootPath);
         return wwwPath;
     }
     return false;
