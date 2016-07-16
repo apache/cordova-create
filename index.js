@@ -196,6 +196,7 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         //Always use cordova fetch to obtain the npm or git template
         if (isGit || isNPM) {
             //Saved to .Cordova folder (ToDo: Delete installed template after using)
+            //ToDo: @carynbear properly label errors from fetch as such
             var tempDest = global_config_path;
             events.emit('log', 'Using cordova-fetch for '+ cfg.lib.www.url);
             return fetch(cfg.lib.www.url, tempDest, {});
