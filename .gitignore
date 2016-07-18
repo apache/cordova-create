@@ -14,3 +14,4 @@ npm-debug.log
 config.gypi
 CVS
 node_modules/*
+node_module/.bin/*
