@@ -105,7 +105,6 @@ describe('create end-to-end', function() {
     });
 
     function checkProject() {
-        console.log('hi');
         // Check if top level dirs exist.
         var dirs = ['hooks', 'platforms', 'plugins', 'www'];
         dirs.forEach(function(d) {
@@ -190,7 +189,6 @@ describe('create end-to-end', function() {
         // Call cordova create with no args, should return help.
         Q()
             .then(function() {
-                console.log('creating proj');
                 // Create a real project
                 return create(project, appId, appName, configGit);
             })
@@ -207,8 +205,6 @@ describe('create end-to-end', function() {
         Q()
             .then(function() {
                 // Create a real project
-                console.log('creating proj2');
-                console.log(project, appId, appName, configNPM);
                 return create(project, appId, appName, configNPM);
             })
             .then(checkProject)

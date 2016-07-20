@@ -33,7 +33,7 @@
     "valid-identifier": "0.0.1"
   },
   "devDependencies": {
-    "jasmine-node": "1.14.5",
+    "jasmine": "^2.4.1",
     "jshint": "2.5.8"
   },
   "scripts": {
