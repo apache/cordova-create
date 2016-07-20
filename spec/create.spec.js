@@ -77,7 +77,7 @@ describe('cordova create checks for valid-identifier', function() {
             expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
         })
         .fin(done);
-    });
+    }, 60000);
     
     it('should reject reserved words from end of id', function(done) {
         create('projectPath', 'bob.class', 'appName')
@@ -85,7 +85,7 @@ describe('cordova create checks for valid-identifier', function() {
             expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
         })
         .fin(done);
-    });
+    }, 60000);
 });
 
 
@@ -207,7 +207,7 @@ describe('create end-to-end', function() {
             expect(err).toBeUndefined();
         })
         .fin(done);
-    }, 10000);
+    }, 60000);
     
     it('should successfully run with template not having a package.json at toplevel', function(done) {
         // Call cordova create with no args, should return help.
@@ -233,7 +233,7 @@ describe('create end-to-end', function() {
             expect(err).toBeUndefined();
         })
         .fin(done);
-    });
+    }, 60000);
     
     it('should successfully run with template having package.json and no sub directory', function(done) {
         // Call cordova create with no args, should return help.
@@ -254,7 +254,7 @@ describe('create end-to-end', function() {
             expect(err).toBeUndefined();
         })
         .fin(done);
-    });
+    }, 60000);
     
     it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function(done) {
         // Call cordova create with no args, should return help.
@@ -276,7 +276,7 @@ describe('create end-to-end', function() {
             expect(err).toBeUndefined();
         })
         .fin(done);
-    });
+    }, 60000);
 
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function(done) {
@@ -291,7 +291,7 @@ describe('create end-to-end', function() {
             expect(err).toBeUndefined();
         })
         .fin(done);
-    });
+    }, 60000);
 
     it('should successfully run config.xml in the www folder and move it outside', function(done) {
         // Call cordova create with no args, should return help.
@@ -306,7 +306,7 @@ describe('create end-to-end', function() {
             expect(err).toBeUndefined();
         })
         .fin(done);
-    });
+    }, 60000);
 
     it('should successfully run with www folder as the template', function(done) {
         var config = {
@@ -326,6 +326,6 @@ describe('create end-to-end', function() {
             expect(err).toBeUndefined();
          })
         .fin(done);
-    });
+    }, 60000);
 
 });
