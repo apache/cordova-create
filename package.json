@@ -39,7 +39,7 @@
   "scripts": {
     "test": "npm run jshint && npm run jasmine",
     "jshint": "jshint index.js spec/create.spec.js",
-    "jasmine": "node node_modules/jasmine-node/bin/jasmine-node --color spec"
+    "jasmine": "jasmine spec/create.spec.js"
   },
   "contributors": [
     {
