@@ -20,7 +20,6 @@
 var helpers = require('./helpers'),
     path = require('path'),
     shell = require('shelljs'),
-    Q = require('q'),
     events = require('cordova-common').events,
     ConfigParser = require('cordova-common').ConfigParser,
     create = require('../index'),
@@ -186,33 +185,28 @@ describe('create end-to-end', function() {
     events.on('results', function(res) { results = res; });
 
     it('should successfully run with Git URL', function(done) {
-        // Call cordova create with no args, should return help.
-        Q()
-            .then(function() {
-                // Create a real project
-                return create(project, appId, appName, configGit);
-            })
-            .then(checkProject)
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+        // Call cordova create with no args, should return help.)
+        // Create a real project
+        return create(project, appId, appName, configGit)
+        .then(checkProject)
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     }, 60000);
 
     it('should successfully run with NPM package', function(done) {
         // Call cordova create with no args, should return help.
-        Q()
-            .then(function() {
-                // Create a real project
-                return create(project, appId, appName, configNPM);
-            })
-            .then(checkProject)
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+  
+        // Create a real project
+        return create(project, appId, appName, configNPM)
+        .then(checkProject)
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     }, 10000);
     
     it('should successfully run with template not having a package.json at toplevel', function(done) {
@@ -226,22 +220,19 @@ describe('create end-to-end', function() {
                 }
             }
         };
-        Q()
-            .then(function() {
-                // Create a real project
-                return create(project, appId, appName, config);
-            })
-            .then(checkProject)
-            .then(function(){
-                // Check that we got the right config.xml
-                var configXml = new ConfigParser(path.join(project, 'config.xml'));
-                expect(configXml.description()).toEqual('this is the very correct config.xml');
-            })
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+        // Create a real project
+        return create(project, appId, appName, config)
+        .then(checkProject)
+        .then(function(){
+            // Check that we got the right config.xml
+            var configXml = new ConfigParser(path.join(project, 'config.xml'));
+            expect(configXml.description()).toEqual('this is the very correct config.xml');
+        })
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     });
     
     it('should successfully run with template having package.json and no sub directory', function(done) {
@@ -255,17 +246,14 @@ describe('create end-to-end', function() {
                 }
             }
         };
-        Q()
-            .then(function() {
-                // Create a real project
-                return create(project, appId, appName, config);
-            })
-            .then(checkProject)
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+        // Create a real project
+        return create(project, appId, appName, config)
+        .then(checkProject)
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     });
     
     it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function(done) {
@@ -279,52 +267,45 @@ describe('create end-to-end', function() {
                 }
             }
         };
-        Q()
-            .then(function() {
-                // Create a real project
-                return create(project, appId, appName, config);
-            })
-            .then(checkProject)
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+
+        // Create a real project
+        return create(project, appId, appName, config)
+        .then(checkProject)
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     });
 
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function(done) {
         // Call cordova create with no args, should return help.
         var config = configSubDirPkgJson;
-        Q()
-            .then(function() {
-                // Create a real project
-                project = project + '1';
-                return create(project, appId, appName, config);
-            })
-            .then(checkSubDir)
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+        // Create a real project
+        project = project + '1';
+        return create(project, appId, appName, config)
+        .then(checkSubDir)
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     });
 
     it('should successfully run config.xml in the www folder and move it outside', function(done) {
         // Call cordova create with no args, should return help.
         var config = configConfigInWww;
-        Q()
-            .then(function() {
-                // Create a real project
-                project = project + '2';
-                return create(project, appId, appName, config);
-            })
-            .then(checkConfigXml)
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+
+        project = project + '2';
+        // Create a real project
+        return create(project, appId, appName, config)
+        .then(checkConfigXml)
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
     });
 
     it('should successfully run with www folder as the template', function(done) {
@@ -337,17 +318,14 @@ describe('create end-to-end', function() {
                 }
             }
         };
-        Q()
-            .then(function() {
-                project = project + '3';
-                return create(project, appId, appName, config);
-            })
-            .then(checkConfigXml)
-            .fail(function(err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+        project = project + '3';
+        return create(project, appId, appName, config)
+        .then(checkConfigXml)
+        .fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+         })
+        .fin(done);
     });
 
 });
