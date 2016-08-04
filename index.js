@@ -189,6 +189,12 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         var isGit;
         var isNPM;
 
+        //If symlink, don't fetch
+        if (!!cfg.lib.www.link) {
+            events.emit('verbose', 'Symlinking assets.');
+            return Q(cfg.lib.www.url);
+        }
+
         events.emit('verbose', 'Copying assets."');
         isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
         isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url)));
@@ -247,14 +253,19 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         }
 
         try {
+
             // Copy files from template to project
             if (cfg.lib.www.template)
                 copyTemplateFiles(import_from_path, dir, isSubDir);
 
-            // If following were not copied from template, copy from stock app hello world
-            ifNotCopied(paths.www, path.join(dir, 'www'));
-            ifNotCopied(paths.hooks, path.join(dir, 'hooks'));
-            var configXmlExists = projectConfig(dir);
+            // If --link, link merges, hooks, www, and config.xml (and/or copy to root)
+            if (!!cfg.lib.www.link)
+                linkFromTemplate(import_from_path, dir);
+
+            // If following were not copied/linked from template, copy from stock app hello world
+            copyIfNotExists(paths.www, path.join(dir, 'www'));
+            copyIfNotExists(paths.hooks, path.join(dir, 'hooks'));
+            var configXmlExists = projectConfig(dir); //moves config to root if in www
             if (paths.configXml && !configXmlExists) {
                 shell.cp(paths.configXml, path.join(dir, 'config.xml'));
             }
@@ -262,17 +273,21 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
             if (!dirAlreadyExisted) {
                 shell.rm('-rf', dir);
             }
+            if (process.platform.slice(0, 3) == 'win' && e.code == 'EPERM')  {
+                throw new CordovaError('Symlinks on Windows require Administrator privileges');
+            }
             throw e;
         }
 
-        // Update package.json name and version fields.
-        if (fs.existsSync(path.join(dir, 'package.json'))) {
-            var pkgjson = require(path.resolve(dir, 'package.json'));
+        var pkgjsonPath = path.join(dir, 'package.json');
+        // Update package.json name and version fields
+        if (fs.existsSync(pkgjsonPath)) {
+            var pkgjson = require(pkgjsonPath);
             if (cfg.name) {
                 pkgjson.name = cfg.name.toLowerCase();
             }
             pkgjson.version = '1.0.0';
-            fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify(pkgjson, null, 4), 'utf8');
+            fs.writeFileSync(pkgjsonPath, JSON.stringify(pkgjson, null, 4), 'utf8');
         }
 
         // Create basic project structure.
@@ -282,25 +297,28 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         if (!fs.existsSync(path.join(dir, 'plugins')))
             shell.mkdir(path.join(dir, 'plugins'));
 
-        // Write out id and name to config.xml; set version to 1.0.0 (to match package.json default version)
-        var configPath = projectConfig(dir);
-        var conf = new ConfigParser(configPath);
-        if (cfg.id) conf.setPackageName(cfg.id);
-        if (cfg.name) conf.setName(cfg.name);
-        conf.setVersion('1.0.0');
-        conf.write();
+        var configPath = path.join(dir, 'config.xml');
+        // only update config.xml if not a symlink
+        if(!fs.lstatSync(configPath).isSymbolicLink()) {
+            // Write out id and name to config.xml; set version to 1.0.0 (to match package.json default version)
+            var conf = new ConfigParser(configPath);
+            if (cfg.id) conf.setPackageName(cfg.id);
+            if (cfg.name) conf.setName(cfg.name);
+            conf.setVersion('1.0.0');
+            conf.write();
+        }  
     }).then(function(){
         cleanupEvents();
     });
 };
 
 /**
- * Recursively copies folder to destination if folder is not found in destination.
+ * Recursively copies folder to destination if folder is not found in destination (including symlinks).
  * @param  {string} src for copying
  * @param  {string} dst for copying
  * @return No return value
  */
-function ifNotCopied(src, dst) {
+function copyIfNotExists(src, dst) {
     if (!fs.existsSync(dst) && src) {
         shell.mkdir(dst);
         shell.cp('-R', path.join(src, '*'), dst);
@@ -410,3 +428,47 @@ function writeToConfigJson(project_root, opts, autoPersist) {
         return json; 
     } 
 }
+
+/**
+ * Removes existing files and symlinks them if they exist.
+ * Symlinks folders: www, merges, hooks 
+ * Symlinks file: config.xml (but only if it exists outside of the www folder)
+ * If config.xml exists inside of template/www, COPY (not link) it to project/
+ * */
+ function linkFromTemplate(templateDir, projectDir) {
+    var linkSrc, linkDst, linkFolders, copySrc, copyDst;
+    function rmlinkSync(src, dst, type) {
+        if (src && dst) {
+            if (fs.existsSync(dst)) {
+                shell.rm('-rf', dst);
+            }
+            if (fs.existsSync(src)) {
+                fs.symlinkSync(src, dst, type);
+            }
+        }
+    } 
+    // if template is a www dir
+    if (path.basename(templateDir) === 'www') {
+        linkSrc = path.resolve(templateDir);
+        linkDst = path.join(projectDir, 'www');
+        rmlinkSync(linkSrc, linkDst, 'dir');
+        copySrc = path.join(templateDir, 'config.xml');
+    } else {
+        linkFolders = ['www', 'merges', 'hooks'];
+        // Link each folder
+        for (var i = 0; i < linkFolders.length; i++) {
+            linkSrc = path.join(templateDir, linkFolders[i]);
+            linkDst = path.join(projectDir, linkFolders[i]);
+            rmlinkSync(linkSrc, linkDst, 'dir');
+        }
+        linkSrc = path.join(templateDir, 'config.xml');
+        linkDst = path.join(projectDir, 'config.xml');
+        rmlinkSync(linkSrc, linkDst, 'file');
+        copySrc = path.join(templateDir, 'www', 'config.xml');
+    }
+    // if template/www/config.xml then copy to project/config.xml
+    copyDst = path.join(projectDir, 'config.xml');
+    if (!fs.existsSync(copyDst) && fs.existsSync(copySrc)) {
+        shell.cp(copySrc, projectDir);
+    }
+ }

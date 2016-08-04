@@ -23,6 +23,7 @@ var helpers = require('./helpers'),
     events = require('cordova-common').events,
     ConfigParser = require('cordova-common').ConfigParser,
     create = require('../index'),
+    fs = require('fs'),
     CordovaLogger = require('cordova-common').CordovaLogger.get().setLevel('error');
 
 var tmpDir = helpers.tmpDir('create_test');
@@ -328,4 +329,186 @@ describe('create end-to-end', function() {
         .fin(done);
     }, 60000);
 
+    describe('when --link-to is provided', function() {
+            it('when passed www folder should not move www/config.xml, only copy and update', function(done) {
+                function checkSymWWW() {
+                    // Check if top level dirs exist.
+                    var dirs = ['hooks', 'platforms', 'plugins', 'www'];
+                    dirs.forEach(function(d) {
+                        expect(path.join(project, d)).toExist();
+                    });
+                    expect(path.join(project, 'hooks', 'README.md')).toExist();
+
+                    // Check if www files exist.
+                    expect(path.join(project, 'www', 'index.html')).toExist();
+                    
+                    // Check www/config exists 
+                    expect(path.join(project, 'www', 'config.xml')).toExist();
+                    // Check www/config.xml was not updated. 
+                    var configXml = new ConfigParser(path.join(project, 'www', 'config.xml'));
+                    expect(configXml.packageName()).toEqual('io.cordova.hellocordova');
+                    expect(configXml.version()).toEqual('0.0.1');
+                    expect(configXml.description()).toEqual('this is the correct config.xml');
+
+                    // Check that config.xml was copied to project/config.xml
+                    expect(path.join(project, 'config.xml')).toExist();
+                    configXml = new ConfigParser(path.join(project, 'config.xml'));
+                    expect(configXml.description()).toEqual('this is the correct config.xml');
+                    // Check project/config.xml was updated. 
+                    expect(configXml.packageName()).toEqual(appId);
+                    expect(configXml.version()).toEqual('1.0.0');
+
+                    // Check that we got no package.json
+                    expect(path.join(project, 'package.json')).not.toExist();
+
+                     // Check that www is really a symlink, 
+                    // and project/config.xml , hooks and merges are not
+                    expect(fs.lstatSync(path.join(project, 'www')).isSymbolicLink()).toBe(true);
+                    expect(fs.lstatSync(path.join(project, 'hooks')).isSymbolicLink()).not.toBe(true);
+                    expect(fs.lstatSync(path.join(project, 'config.xml')).isSymbolicLink()).not.toBe(true);
+                }
+                var config = {
+                    lib: {
+                        www: {
+                            template: true,
+                            url: path.join(__dirname, 'templates', 'config_in_www', 'www'),
+                            version: '',
+                            link: true
+                        }
+                    }
+                };
+                project = project + '4';
+                return create(project, appId, appName, config)
+                    .then(checkSymWWW)
+                    .fail(function(err) {
+                        if(process.platform.slice(0, 3) == 'win') {
+                            // Allow symlink error if not in admin mode
+                            expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
+                        } else {
+                            if (err) {
+                                console.log(err.stack);
+                            }
+                            expect(err).toBeUndefined();
+                        }
+                    })
+                    .fin(done);
+            }, 60000);
+
+            it('with subdirectory should not update symlinked project/config.xml', function(done) {
+                function checkSymSubDir() {
+                    // Check if top level dirs exist.
+                    var dirs = ['hooks', 'platforms', 'plugins', 'www'];
+                    dirs.forEach(function(d) {
+                        expect(path.join(project, d)).toExist();
+                    });
+                    expect(path.join(project, 'hooks', 'README.md')).toExist();
+                    
+                    //index.js and template subdir folder should not exist (inner files should be copied to the project folder)
+                    expect(path.join(project, 'index.js')).not.toExist();
+                    expect(path.join(project, 'template')).not.toExist();
+
+                    // Check if www files exist.
+                    expect(path.join(project, 'www', 'index.html')).toExist();
+
+                    // Check that www, and config.xml is really a symlink
+                    expect(fs.lstatSync(path.join(project, 'www')).isSymbolicLink()).toBe(true);
+                    expect(fs.lstatSync(path.join(project, 'config.xml')).isSymbolicLink()).toBe(true);
+
+                    // Check that config.xml was not updated. (symlinked config does not get updated!)
+                    var configXml = new ConfigParser(path.join(project, 'config.xml'));
+                    expect(configXml.packageName()).toEqual('io.cordova.hellocordova');
+                    expect(configXml.version()).toEqual('0.0.1');
+                    
+                    // Check that we got the right config.xml
+                    expect(configXml.description()).toEqual('this is the correct config.xml');
+
+                    // Check that we got package.json (the correct one) and it was changed
+                    var pkjson = require(path.join(project, 'package.json'));
+                    expect(pkjson.name).toEqual(appName.toLowerCase());
+                    expect(pkjson.valid).toEqual('true');
+                }
+                var config = {
+                    lib: {
+                        www: {
+                            template: true,
+                            url: path.join(__dirname, 'templates', 'withsubdirectory_package_json'),
+                            version: '',
+                            link: true
+                        }
+                    }
+                };
+                project = project + '5';
+                return create(project, appId, appName, config)
+                    .then(checkSymSubDir)
+                    .fail(function(err) {
+                        if(process.platform.slice(0, 3) == 'win') {
+                            // Allow symlink error if not in admin mode
+                            expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
+                        } else {
+                            if (err) {
+                                console.log(err.stack);
+                            }
+                            expect(err).toBeUndefined();
+                        }
+                    })
+                    .fin(done);
+            }, 60000);
+
+            it('with no config should create one and update it', function(done) {
+                function checkSymNoConfig() {
+                    // Check if top level dirs exist.
+                    var dirs = ['hooks', 'platforms', 'plugins', 'www'];
+                    dirs.forEach(function(d) {
+                        expect(path.join(project, d)).toExist();
+                    });
+                    expect(path.join(project, 'hooks', 'hooks.file')).toExist();
+                    expect(path.join(project, 'merges', 'merges.file')).toExist();
+
+                    // Check if www files exist.
+                    expect(path.join(project, 'www', 'index.html')).toExist();
+
+                    // Check that config.xml was updated.
+                    var configXml = new ConfigParser(path.join(project, 'config.xml'));
+                    expect(configXml.packageName()).toEqual(appId);
+
+                    // Check that www, hooks, merges are really a symlink; config is not
+                    expect(fs.lstatSync(path.join(project, 'www')).isSymbolicLink()).toBe(true);
+                    expect(fs.lstatSync(path.join(project, 'hooks')).isSymbolicLink()).toBe(true);
+                    expect(fs.lstatSync(path.join(project, 'merges')).isSymbolicLink()).toBe(true);
+                    expect(fs.lstatSync(path.join(project, 'config.xml')).isSymbolicLink()).not.toBe(true);
+                }
+
+                var config = {
+                    lib: {
+                        www: {
+                            template: true,
+                            url: path.join(__dirname, 'templates', 'noconfig'),
+                            version: '',
+                            link: true
+                        }
+                    }
+                };
+                project = project + '6';
+                return create(project, appId, appName, config)
+                    .then(checkSymNoConfig)
+                    .fail(function(err) {
+                        if(process.platform.slice(0, 3) == 'win') {
+                            // Allow symlink error if not in admin mode
+                            expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
+                        } else {
+                            if (err) {
+                                console.log(err.stack);
+                            }
+                            expect(err).toBeUndefined();
+                        }
+                    })
+                    .fin(done);
+            }, 60000);
+
+        });
+
+    
+
+
+                
 });
