@@ -19,8 +19,8 @@
 #
 -->
 
-[![Build status](https://ci.appveyor.com/api/projects/status/pejqbhscb3mlnt74)](https://ci.appveyor.com/project/stevengill/cordova-create)
-[![Build Status](https://travis-ci.org/stevengill/cordova-create.svg?branch=master)](https://travis-ci.org/stevengill/cordova-create)
+[![Build status]()](https://ci.appveyor.com/project/Humbedooh/cordova-create)
+[![Build Status](https://travis-ci.org/apache/cordova-create.svg?branch=master)](https://travis-ci.org/apache/cordova-create)
 
 # cordova-create
 
