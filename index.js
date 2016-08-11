@@ -205,7 +205,14 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
             //ToDo: @carynbear properly label errors from fetch as such
             var tempDest = global_config_path;
             events.emit('log', 'Using cordova-fetch for '+ cfg.lib.www.url);
-            return fetch(cfg.lib.www.url, tempDest, {});
+            return fetch(cfg.lib.www.url, tempDest, {})
+            .fail(function(err){
+                events.emit('error', '\033[1m \033[31m Error from Cordova Fetch: ' + err.message);
+                if (options.verbose) {
+                    console.trace();
+                }
+                throw err;
+            });
         //If assets are not online, resolve as a relative path on local computer
         } else {
             cfg.lib.www.url = path.resolve(cfg.lib.www.url);
