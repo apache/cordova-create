@@ -24,7 +24,7 @@
 
 # cordova-create
 
-This module is used for creating cordova style projects. 
+This module is used for creating cordova style projects. It also incudes support for [cordova templates](http://cordova.apache.org/docs/en/latest/guide/cli/template.html). It can fetch templates from npm and git.
 
 ## Usage:
 :
@@ -39,3 +39,17 @@ create(dir, id, name, cfg, extEvents);
  `name` - app name. Required (but can be "undefined"). 
  `cfg` - extra config to be saved in .cordova/config.json Required (but can be "{}").
  `extEvents` - An EventEmitter instance that will be used for logging purposes. Required (but can be "undefined").
+
+An example of cfg which would fetch a cordova template from npm (or git):
+
+```
+var cfg = {
+    lib: {
+        www: {
+            template: true,
+            url: 'cordova-app-hello-world',
+            version: ''
+        }
+    }
+};
+```
