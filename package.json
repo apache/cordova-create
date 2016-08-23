@@ -26,8 +26,8 @@
   "engineStrict": true,
   "dependencies": {
     "cordova-app-hello-world": "^3.10.0",
-    "cordova-common": "^1.4.0",
-    "cordova-fetch": "^1.0.0",
+    "cordova-common": "^1.4.1",
+    "cordova-fetch": "^1.0.1",
     "q": "1.0.1",
     "shelljs": "0.3.0",
     "valid-identifier": "0.0.1"

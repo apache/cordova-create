@@ -20,4 +20,9 @@
 -->
 # Cordova-create Release Notes
 
-
+### 1.0.0 (August 23, 2016)
+* CB-11623 added symlinking option
+* fixed jasmine custom matcher for `toExist`
+* updated jasmine dep, fixed caching issue with tests
+* added `travis` and `appveyor` support
+* version 1.0.0 for **npm**
