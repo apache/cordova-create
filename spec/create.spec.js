@@ -73,7 +73,7 @@ var configNPM = {
 
 describe('cordova create checks for valid-identifier', function() {
     it('should reject reserved words from start of id', function(done) {
-        create('projectPath', 'int.bob', 'appName')
+        create('projectPath', 'int.bob', 'appName', {}, events)
         .fail(function(err) {
             expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
         })
@@ -81,7 +81,7 @@ describe('cordova create checks for valid-identifier', function() {
     }, 60000);
     
     it('should reject reserved words from end of id', function(done) {
-        create('projectPath', 'bob.class', 'appName')
+        create('projectPath', 'bob.class', 'appName', {}, events)
         .fail(function(err) {
             expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
         })
@@ -188,7 +188,7 @@ describe('create end-to-end', function() {
     it('should successfully run with Git URL', function(done) {
         // Call cordova create with no args, should return help.)
         // Create a real project
-        return create(project, appId, appName, configGit)
+        return create(project, appId, appName, configGit, events)
         .then(checkProject)
         .fail(function(err) {
             console.log(err && err.stack);
@@ -222,7 +222,7 @@ describe('create end-to-end', function() {
             }
         };
         // Create a real project
-        return create(project, appId, appName, config)
+        return create(project, appId, appName, config, events)
         .then(checkProject)
         .then(function(){
             // Check that we got the right config.xml
@@ -248,7 +248,7 @@ describe('create end-to-end', function() {
             }
         };
         // Create a real project
-        return create(project, appId, appName, config)
+        return create(project, appId, appName, config, events)
         .then(checkProject)
         .fail(function(err) {
             console.log(err && err.stack);
@@ -270,7 +270,7 @@ describe('create end-to-end', function() {
         };
 
         // Create a real project
-        return create(project, appId, appName, config)
+        return create(project, appId, appName, config, events)
         .then(checkProject)
         .fail(function(err) {
             console.log(err && err.stack);
@@ -283,7 +283,7 @@ describe('create end-to-end', function() {
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function(done) {
         // Call cordova create with no args, should return help.
         var config = configSubDirPkgJson;
-        return create(project, appId, appName, config)
+        return create(project, appId, appName, config, events)
         .then(checkSubDir)
         .fail(function(err) {
             console.log(err && err.stack);
@@ -296,7 +296,7 @@ describe('create end-to-end', function() {
         // Call cordova create with no args, should return help.
         var config = configConfigInWww;
         // Create a real project
-        return create(project, appId, appName, config)
+        return create(project, appId, appName, config, events)
         .then(checkConfigXml)
         .fail(function(err) {
             console.log(err && err.stack);
@@ -315,7 +315,7 @@ describe('create end-to-end', function() {
                 }
             }
         };
-        return create(project, appId, appName, config)
+        return create(project, appId, appName, config, events)
         .then(checkConfigXml)
         .fail(function(err) {
             console.log(err && err.stack);
@@ -372,7 +372,7 @@ describe('create end-to-end', function() {
                         }
                     }
                 };
-                return create(project, appId, appName, config)
+                return create(project, appId, appName, config, events)
                     .then(checkSymWWW)
                     .fail(function(err) {
                         if(process.platform.slice(0, 3) == 'win') {
@@ -431,7 +431,7 @@ describe('create end-to-end', function() {
                         }
                     }
                 };
-                return create(project, appId, appName, config)
+                return create(project, appId, appName, config, events)
                     .then(checkSymSubDir)
                     .fail(function(err) {
                         if(process.platform.slice(0, 3) == 'win') {
@@ -481,7 +481,7 @@ describe('create end-to-end', function() {
                         }
                     }
                 };
-                return create(project, appId, appName, config)
+                return create(project, appId, appName, config, events)
                     .then(checkSymNoConfig)
                     .fail(function(err) {
                         if(process.platform.slice(0, 3) == 'win') {

@@ -55,9 +55,6 @@ function setupEvents(externalEventEmitter) {
     return events;
 }
 
-function cleanupEvents() {
-    events.removeAllListeners();
-}
 /**
  * Usage:
  * @dir - directory where the project will be created. Required.
@@ -314,8 +311,6 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
             conf.setVersion('1.0.0');
             conf.write();
         }  
-    }).then(function(){
-        cleanupEvents();
     });
 };
 
