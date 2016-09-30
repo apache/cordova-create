@@ -20,8 +20,11 @@
 -->
 # Cordova-create Release Notes
 
+### 1.0.1 (Sep 29, 2016)
+* removed stripping eventlisteners
+
 ### 1.0.0 (August 23, 2016)
-* CB-11623 added symlinking option
+* [CB-11623](https://issues.apache.org/jira/browse/CB-11623) added symlinking option
 * fixed jasmine custom matcher for `toExist`
 * updated jasmine dep, fixed caching issue with tests
 * added `travis` and `appveyor` support
