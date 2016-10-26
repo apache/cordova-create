@@ -68,7 +68,7 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
     var argumentCount = arguments.length;
     return Q.fcall(function() {
         events = setupEvents(extEvents);
-        events.emit('warn', 'Using detached cordova-create');
+        events.emit('verbose', 'Using detached cordova-create');
 
         if (!dir) {
             throw new CordovaError('Directory not specified. See `cordova help`.');
