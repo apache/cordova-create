@@ -1,6 +1,6 @@
 {
   "name": "cordova-create",
-  "version": "1.0.2-dev",
+  "version": "1.0.2",
   "description": "Apache Cordova create module. Creates new project from default or template",
   "main": "index.js",
   "repository": {
@@ -26,8 +26,8 @@
   "engineStrict": true,
   "dependencies": {
     "cordova-app-hello-world": "^3.11.0",
-    "cordova-common": "^1.4.1",
-    "cordova-fetch": "^1.0.1",
+    "cordova-common": "2.0.0",
+    "cordova-fetch": "1.0.2",
     "q": "1.0.1",
     "shelljs": "0.3.0",
     "valid-identifier": "0.0.1"

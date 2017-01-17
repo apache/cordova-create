@@ -20,6 +20,10 @@
 -->
 # Cordova-create Release Notes
 
+### 1.0.2 (Jan 17, 2017)
+* change event from `warn` to `verbose`
+* Add github pull request template
+
 ### 1.0.1 (Sep 29, 2016)
 * removed stripping eventlisteners
 
