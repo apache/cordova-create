@@ -287,9 +287,19 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         // Update package.json name and version fields
         if (fs.existsSync(pkgjsonPath)) {
             var pkgjson = require(pkgjsonPath);
+
+            // Pkjson.displayName should equal config's name.
             if (cfg.name) {
-                pkgjson.name = cfg.name.toLowerCase();
+                pkgjson.displayName = cfg.name;
             }
+            // Pkjson.name should equal config's id.
+            if(cfg.id) {
+                pkgjson.name = cfg.id.toLowerCase();
+            } else if(!cfg.id) {
+                // Use default name.
+                pkgjson.name = 'helloworld';
+            }
+
             pkgjson.version = '1.0.0';
             fs.writeFileSync(pkgjsonPath, JSON.stringify(pkgjson, null, 4), 'utf8');
         }
