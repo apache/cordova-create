@@ -20,6 +20,11 @@
 -->
 # Cordova-create Release Notes
 
+### 1.1.0 (May 02, 2017)
+* [CB-10681](https://issues.apache.org/jira/browse/CB-10681) templates will add `@latest` when fetching from npm when no version is specified. This will ensure an older cahced version of the template is not used
+* [CB-12666](https://issues.apache.org/jira/browse/CB-12666) - Remove `node 0.x` support.
+* [CB-12517](https://issues.apache.org/jira/browse/CB-12517): `package.json` `displayname` should equal `config.xml` name feild and `package.json` `name` feild should equal `config.xml` `id` feild.
+
 ### 1.0.2 (Jan 17, 2017)
 * change event from `warn` to `verbose`
 * Add github pull request template
