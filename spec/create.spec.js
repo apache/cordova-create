@@ -24,12 +24,20 @@ var helpers = require('./helpers'),
     ConfigParser = require('cordova-common').ConfigParser,
     create = require('../index'),
     fs = require('fs'),
+    semver = require('semver'),
     CordovaLogger = require('cordova-common').CordovaLogger.get().setLevel('error');
 
 var tmpDir = helpers.tmpDir('create_test');
 var appName = 'TestBase';
 var appId = 'org.testing';
 var project = path.join(tmpDir, appName);
+
+// Global configuration paths
+var global_config_path = process.env.CORDOVA_HOME;
+if (!global_config_path) {
+    var HOME = process.env[(process.platform.slice(0, 3) == 'win') ? 'USERPROFILE' : 'HOME'];
+    global_config_path = path.join(HOME, '.cordova');
+}
 
 var configSubDirPkgJson = {
     lib: {
@@ -61,11 +69,21 @@ var configGit = {
     }
 };
 
+var configNPMold = {
+    lib: {
+        www: {
+            template: true,
+            url: 'phonegap-template-vue-f7-tabs@1.0.0',
+            version: ''
+        }
+    }
+};
+
 var configNPM = {
     lib: {
         www: {
             template: true,
-            url: 'cordova-app-hello-world',
+            url: 'phonegap-template-vue-f7-tabs',
             version: ''
         }
     }
@@ -197,18 +215,29 @@ describe('create end-to-end', function() {
         .fin(done);
     }, 60000);
 
-    // it('should successfully run with NPM package', function(done) {
-    //     // Call cordova create with no args, should return help.
-  
-    //     // Create a real project
-    //     return create(project, appId, appName, configNPM)
-    //     .then(checkProject)
-    //     .fail(function(err) {
-    //         console.log(err && err.stack);
-    //         expect(err).toBeUndefined();
-    //     })
-    //     .fin(done);
-    // }, 60000);
+    it('should successfully run with NPM package and not use old cache of template on second create', function(done) {
+        var templatePkgJsonPath = path.join(global_config_path, 'node_modules', 'phonegap-template-vue-f7-tabs', 'package.json');
+        // Call cordova create with no args, should return help.
+        // Create a real project
+        //uses phonegap-template-vue-f7-tabs
+        return create(project, appId, appName, configNPMold)
+        .then(checkProject)
+        .then(function() {
+            shell.rm('-rf', project);
+            delete require.cache[require.resolve(templatePkgJsonPath)];
+            var pkgJson = require(templatePkgJsonPath);
+            expect(pkgJson.version).toBe('1.0.0');
+            return create(project, appId, appName, configNPM);
+        }).then(function() {
+            delete require.cache[require.resolve(templatePkgJsonPath)];
+            var pkgJson = require(templatePkgJsonPath);
+            expect(semver.gt(pkgJson.version, '1.0.0')).toBeTruthy();
+        }).fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
+    }, 60000);
     
     it('should successfully run with template not having a package.json at toplevel', function(done) {
         // Call cordova create with no args, should return help.
@@ -415,6 +444,7 @@ describe('create end-to-end', function() {
                     
                     // Check that we got the right config.xml
                     expect(configXml.description()).toEqual('this is the correct config.xml');
+                    
                     delete require.cache[require.resolve(path.join(project, 'package.json'))];
                     // Check that we got package.json (the correct one) and it was changed
                     var pkjson = require(path.join(project, 'package.json'));
@@ -498,10 +528,5 @@ describe('create end-to-end', function() {
                     .fin(done);
             }, 60000);
 
-        });
-
-    
-
-
-                
+        });     
 });
