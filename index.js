@@ -194,15 +194,21 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
 
         events.emit('verbose', 'Copying assets."');
         isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
-        isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url)));
+        isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url))) && !isGit;
 
         //Always use cordova fetch to obtain the npm or git template
         if (isGit || isNPM) {
             //Saved to .Cordova folder (ToDo: Delete installed template after using)
             //ToDo: @carynbear properly label errors from fetch as such
             var tempDest = global_config_path;
-            events.emit('log', 'Using cordova-fetch for '+ cfg.lib.www.url);
-            return fetch(cfg.lib.www.url, tempDest, {})
+            var target = cfg.lib.www.url;
+            //add latest to npm module if no version is specified
+            //this prevents create using an older cached version of the template
+            if(isNPM && target.indexOf('@') === -1) {
+                target = cfg.lib.www.url + '@latest';
+            }
+            events.emit('verbose', 'Using cordova-fetch for '+ target);
+            return fetch(target, tempDest, {})
             .fail(function(err){
                 events.emit('error', '\033[1m \033[31m Error from Cordova Fetch: ' + err.message);
                 if (options.verbose) {
@@ -286,6 +292,7 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         var pkgjsonPath = path.join(dir, 'package.json');
         // Update package.json name and version fields
         if (fs.existsSync(pkgjsonPath)) {
+            delete require.cache[require.resolve(pkgjsonPath)];
             var pkgjson = require(pkgjsonPath);
 
             // Pkjson.displayName should equal config's name.

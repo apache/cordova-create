@@ -171,8 +171,7 @@ describe('create end-to-end', function() {
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.version()).toEqual('1.0.0');
-
-
+        delete require.cache[require.resolve(path.join(project, 'package.json'))];
         // Check that we got package.json (the correct one)
         var pkjson = require(path.join(project, 'package.json'));
         // Pkjson.displayName should equal config's name.
@@ -416,7 +415,7 @@ describe('create end-to-end', function() {
                     
                     // Check that we got the right config.xml
                     expect(configXml.description()).toEqual('this is the correct config.xml');
-
+                    delete require.cache[require.resolve(path.join(project, 'package.json'))];
                     // Check that we got package.json (the correct one) and it was changed
                     var pkjson = require(path.join(project, 'package.json'));
                     // Pkjson.name should equal config's id.
