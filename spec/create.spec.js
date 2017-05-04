@@ -109,7 +109,6 @@ describe('cordova create checks for valid-identifier', function() {
 
 
 describe('create end-to-end', function() {
-    //this.timeout(240000);
 
     beforeEach(function() {
         shell.rm('-rf', project);
@@ -203,9 +202,25 @@ describe('create end-to-end', function() {
     var results;
     events.on('results', function(res) { results = res; });
 
+    it('should successfully run without template and use default hello-world app', function(done) {
+        // Create a real project with no template
+        // use default cordova-app-hello-world app
+        return create(project, appId, appName, {}, events)
+        .then(checkProject)
+        .then(function() {
+            delete require.cache[require.resolve(path.join(project, 'package.json'))];
+            var pkgJson = require(path.join(project, 'package.json'));
+            //confirm default hello world app copies over package.json and it matched appId
+            expect(pkgJson.name).toEqual(appId);
+        }).fail(function(err) {
+            console.log(err && err.stack);
+            expect(err).toBeUndefined();
+        })
+        .fin(done);
+    }, 60000);
+
     it('should successfully run with Git URL', function(done) {
-        // Call cordova create with no args, should return help.)
-        // Create a real project
+        // Create a real project with gitURL as template
         return create(project, appId, appName, configGit, events)
         .then(checkProject)
         .fail(function(err) {
@@ -217,9 +232,9 @@ describe('create end-to-end', function() {
 
     it('should successfully run with NPM package and not use old cache of template on second create', function(done) {
         var templatePkgJsonPath = path.join(global_config_path, 'node_modules', 'phonegap-template-vue-f7-tabs', 'package.json');
-        // Call cordova create with no args, should return help.
-        // Create a real project
-        //uses phonegap-template-vue-f7-tabs
+        // Create a real project with npm module as template
+        // tests cache clearing of npm template
+        // uses phonegap-template-vue-f7-tabs
         return create(project, appId, appName, configNPMold)
         .then(checkProject)
         .then(function() {

@@ -133,7 +133,8 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
 
         if (!cfg.lib.www.url) {
             try {
-                cfg.lib.www.url = require('cordova-app-hello-world').dirname;
+                cfg.lib.www.url = require.resolve('cordova-app-hello-world');
+                cfg.lib.www.template = true;
             } catch (e) {
                 // Falling back on npm@2 path hierarchy
                 // TODO: Remove fallback after cordova-app-hello-world release
@@ -229,7 +230,7 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
             // Delete cached require incase one exists
             delete require.cache[require.resolve(input_directory)];
             var templatePkg = require(input_directory);
-            if (templatePkg && templatePkg.dirname){
+            if (templatePkg && templatePkg.dirname) {
                 import_from_path = templatePkg.dirname;
                 isSubDir = true;
             }
@@ -255,7 +256,6 @@ module.exports = function(dir, optionalId, optionalName, cfg, extEvents) {
         paths.hooks = path.join(require('cordova-app-hello-world').dirname, 'hooks');
         
         // ToDo: get stock package.json if template does not contain package.json;
-
         var dirAlreadyExisted = fs.existsSync(dir);
         if (!dirAlreadyExisted) {
             fs.mkdirSync(dir);
