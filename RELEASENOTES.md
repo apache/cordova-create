@@ -20,6 +20,9 @@
 -->
 # Cordova-create Release Notes
 
+### 1.1.1 (May 08, 2017)
+* [CB-12765](https://issues.apache.org/jira/browse/CB-12765) default app `cordova-app-hello-world` is now treated like a template
+
 ### 1.1.0 (May 02, 2017)
 * [CB-10681](https://issues.apache.org/jira/browse/CB-10681) templates will add `@latest` when fetching from npm when no version is specified. This will ensure an older cahced version of the template is not used
 * [CB-12666](https://issues.apache.org/jira/browse/CB-12666) - Remove `node 0.x` support.
