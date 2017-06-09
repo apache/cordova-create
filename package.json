@@ -33,13 +33,19 @@
     "valid-identifier": "0.0.1"
   },
   "devDependencies": {
+    "eslint": "^4.2.0",
+    "eslint-config-semistandard": "^11.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-node": "^5.0.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
     "jasmine": "^2.4.1",
-    "jshint": "2.5.8",
     "semver": "^5.3.0"
   },
   "scripts": {
-    "test": "npm run jshint && npm run jasmine",
-    "jshint": "jshint index.js spec/create.spec.js",
+    "test": "npm run eslint && npm run jasmine",
+    "eslint": "eslint index.js spec/create.spec.js",
     "jasmine": "jasmine spec/create.spec.js"
   },
   "contributors": [

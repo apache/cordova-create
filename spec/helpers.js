@@ -17,16 +17,16 @@
     under the License.
 */
 
-var path         = require('path'),
-    fs           = require('fs'),
-    shell        = require('shelljs'),
-    os           = require('os'),
+var path = require('path'),
+    fs = require('fs'),
+    shell = require('shelljs'),
+    os = require('os'),
     ConfigParser = require('cordova-common').ConfigParser;
 
 // Just use Android everywhere; we're mocking out any calls to the `android` binary.
 module.exports.testPlatform = 'android';
 
-function getConfigPath(dir) {
+function getConfigPath (dir) {
     // if path ends with 'config.xml', return it
     if (dir.indexOf('config.xml') == dir.length - 10) {
         return dir;
@@ -40,7 +40,7 @@ module.exports.tmpDir = function (subdir) {
     if (subdir) {
         dir = path.join(dir, subdir);
     }
-    if(fs.existsSync(dir)) {
+    if (fs.existsSync(dir)) {
         shell.rm('-rf', dir);
     }
     shell.mkdir('-p', dir);
@@ -156,17 +156,16 @@ beforeEach(function () {
                     var result = {};
                     result.pass = fs.existsSync(testPath);
 
-                    if(result.pass) {
+                    if (result.pass) {
                         result.message = 'Expected file ' + testPath + ' to exist.';
                     } else {
                         result.message = 'Expected file ' + testPath + ' to not exist.';
                     }
 
-                    return result
+                    return result;
 
                 }
-            }
+            };
         }
     });
 });
-
