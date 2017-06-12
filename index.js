@@ -204,6 +204,9 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 return fetch(target, tempDest, {})
                     .fail(function (err) {
                         events.emit('error', '\x1B[1m \x1B[31m Error from Cordova Fetch: ' + err.message);
+                        events.emit('error', 'The template you are trying to use is invalid.' +
+                        ' Make sure you follow the template guide found here https://cordova.apache.org/docs/en/latest/guide/cli/template.html.' +
+                        ' Templates now require a package.json.');
                         if (options.verbose) {
                             console.trace();
                         }
