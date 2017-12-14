@@ -20,6 +20,11 @@
 -->
 # Cordova-create Release Notes
 
+### 1.1.2 (Dec 14, 2017)
+* [CB-12807](https://issues.apache.org/jira/browse/CB-12807): updated error message to follow the template guide
+* [CB-13674](https://issues.apache.org/jira/browse/CB-13674): updated deps
+* [CB-13501](https://issues.apache.org/jira/browse/CB-13501): added support for node 8 to tests
+
 ### 1.1.1 (May 08, 2017)
 * [CB-12765](https://issues.apache.org/jira/browse/CB-12765) default app `cordova-app-hello-world` is now treated like a template
 
