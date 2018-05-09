@@ -217,7 +217,8 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 cfg.lib.www.url = path.resolve(cfg.lib.www.url);
                 return Q(cfg.lib.www.url);
             }
-        }).then(function (input_directory) {
+        })
+        .then(function (input_directory) {
             var import_from_path = input_directory;
 
             // handle when input wants to specify sub-directory (specified in index.js as "dirname" export);
