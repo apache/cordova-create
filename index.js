@@ -214,25 +214,12 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                     import_from_path);
             }
 
-            var paths = {};
-
-            // get stock config.xml, used if template does not contain config.xml
-            paths.configXml = path.join(require('cordova-app-hello-world').dirname, 'config.xml');
-
-            // get stock www; used if template does not contain www
-            paths.www = path.join(require('cordova-app-hello-world').dirname, 'www');
-
-            // get stock hooks; used if template does not contain hooks
-            paths.hooks = path.join(require('cordova-app-hello-world').dirname, 'hooks');
-
-
             var dirAlreadyExisted = fs.existsSync(dir);
             if (!dirAlreadyExisted) {
                 fs.mkdirSync(dir);
             }
 
             try {
-
                 // Copy files from template to project
                 if (cfg.lib.www.template) { copyTemplateFiles(import_from_path, dir, isSubDir); }
 
@@ -241,11 +228,11 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
 
                 // If following were not copied/linked from template, copy from stock app hello world
                 // TODO: get stock package.json if template does not contain package.json;
-                copyIfNotExists(paths.www, path.join(dir, 'www'));
-                copyIfNotExists(paths.hooks, path.join(dir, 'hooks'));
+                copyIfNotExists(stockAssetPath('www'), path.join(dir, 'www'));
+                copyIfNotExists(stockAssetPath('hooks'), path.join(dir, 'hooks'));
                 var configXmlExists = projectConfig(dir); // moves config to root if in www
-                if (paths.configXml && !configXmlExists) {
-                    shell.cp(paths.configXml, path.join(dir, 'config.xml'));
+                if (!configXmlExists) {
+                    shell.cp(stockAssetPath('config.xml'), path.join(dir, 'config.xml'));
                 }
             } catch (e) {
                 if (!dirAlreadyExisted) {
@@ -429,4 +416,8 @@ function linkFromTemplate (templateDir, projectDir) {
     if (!fs.existsSync(copyDst) && fs.existsSync(copySrc)) {
         shell.cp(copySrc, projectDir);
     }
+}
+
+function stockAssetPath (p) {
+    return path.join(require('cordova-app-hello-world').dirname, p);
 }
