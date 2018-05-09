@@ -24,6 +24,7 @@ var path = require('path');
 var Promise = require('q');
 var isUrl = require('is-url');
 var shell = require('shelljs');
+var isObject = require('isobject');
 var requireFresh = require('import-fresh');
 var validateIdentifier = require('valid-identifier');
 
@@ -75,28 +76,9 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             throw new CordovaError('Directory not specified. See `cordova help`.');
         }
 
-        // read projects .cordova/config.json file for project settings
-        var configFile = dotCordovaConfig(dir);
-
-        // if data exists in the configFile, lets combine it with cfg
-        // cfg values take priority over config file
-        if (configFile) {
-            var finalConfig = {};
-            for (var key1 in configFile) {
-                finalConfig[key1] = configFile[key1];
-            }
-
-            for (var key2 in cfg) {
-                finalConfig[key2] = cfg[key2];
-            }
-
-            cfg = finalConfig;
-        }
-
-        if (!cfg) {
-            throw new CordovaError('Must provide a project configuration.');
-        } else if (typeof cfg === 'string') {
-            cfg = JSON.parse(cfg);
+        cfg = cfg || {};
+        if (!isObject(cfg)) {
+            throw new CordovaError('If given, cfg must be an object');
         }
 
         if (optionalId) cfg.id = optionalId;
@@ -105,20 +87,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
         // Make absolute.
         dir = path.resolve(dir);
 
-        // dir must be either empty except for .cordova config file or not exist at all..
-        var sanedircontents = function (d) {
-            var contents = fs.readdirSync(d);
-            if (contents.length === 0) {
-                return true;
-            } else if (contents.length === 1) {
-                if (contents[0] === '.cordova') {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        if (fs.existsSync(dir) && !sanedircontents(dir)) {
+        if (fs.existsSync(dir) && fs.readdirSync(dir).length > 0) {
             throw new CordovaError('Path already exists and is not empty: ' + dir);
         }
 
@@ -344,23 +313,6 @@ function projectConfig (projectDir) {
         return wwwPath;
     }
     return false;
-}
-
-/**
- * Retrieve and read the .cordova/config file of a cordova project
- *
- * @param  {String} project directory
- * @return {JSON data} config file's contents
- */
-function dotCordovaConfig (project_root) {
-    var configPath = path.join(project_root, '.cordova', 'config.json');
-    var data;
-    if (!fs.existsSync(configPath)) {
-        data = '{}';
-    } else {
-        data = fs.readFileSync(configPath, 'utf-8');
-    }
-    return JSON.parse(data);
 }
 
 /**
