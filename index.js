@@ -157,19 +157,6 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             // Finally, Ready to start!
             events.emit('log', 'Creating a new cordova project.');
 
-            // Strip link and url from cfg to avoid them being persisted to disk via .cordova/config.json.
-            // TODO: apparently underscore has no deep clone.  Replace with lodash or something. For now, abuse JSON.
-            var cfgToPersistToDisk = JSON.parse(JSON.stringify(cfg));
-
-            delete cfgToPersistToDisk.lib.www;
-            if (Object.keys(cfgToPersistToDisk.lib).length === 0) {
-                delete cfgToPersistToDisk.lib;
-            }
-
-            // Update cached version of config.json
-            writeToConfigJson(dir, cfgToPersistToDisk, false);
-        })
-        .then(function () {
             var isGit;
             var isNPM;
             var options;
@@ -406,33 +393,6 @@ function dotCordovaConfig (project_root) {
         data = fs.readFileSync(configPath, 'utf-8');
     }
     return JSON.parse(data);
-}
-
-/**
- * Write opts to .cordova/config.json
- *
- * @param  {String} project directory
- * @param  {Object} opts containing the additions to config.json
- * @param  {Boolean} autopersist option
- * @return {JSON Data}
- */
-function writeToConfigJson (project_root, opts, autoPersist) {
-    var json = dotCordovaConfig(project_root);
-    for (var p in opts) {
-        json[p] = opts[p];
-    }
-    if (autoPersist) {
-        var configPath = path.join(project_root, '.cordova', 'config.json');
-        var contents = JSON.stringify(json, null, 4);
-        // Don't write the file for an empty config.
-        if (contents !== '{}' || fs.existsSync(configPath)) {
-            shell.mkdir('-p', path.join(project_root, '.cordova'));
-            fs.writeFileSync(configPath, contents, 'utf-8');
-        }
-        return json;
-    } else {
-        return json;
-    }
 }
 
 /**
