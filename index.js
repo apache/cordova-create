@@ -226,7 +226,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             // get stock hooks; used if template does not contain hooks
             paths.hooks = path.join(require('cordova-app-hello-world').dirname, 'hooks');
 
-            // ToDo: get stock package.json if template does not contain package.json;
+
             var dirAlreadyExisted = fs.existsSync(dir);
             if (!dirAlreadyExisted) {
                 fs.mkdirSync(dir);
@@ -241,6 +241,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 if (cfg.lib.www.link) { linkFromTemplate(import_from_path, dir); }
 
                 // If following were not copied/linked from template, copy from stock app hello world
+                // TODO: get stock package.json if template does not contain package.json;
                 copyIfNotExists(paths.www, path.join(dir, 'www'));
                 copyIfNotExists(paths.hooks, path.join(dir, 'hooks'));
                 var configXmlExists = projectConfig(dir); // moves config to root if in www
