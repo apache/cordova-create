@@ -129,14 +129,8 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
         cfg.lib.www.url = cfg.lib.www.url || cfg.lib.www.uri;
 
         if (!cfg.lib.www.url) {
-            try {
-                cfg.lib.www.url = require.resolve('cordova-app-hello-world');
-                cfg.lib.www.template = true;
-            } catch (e) {
-                // Falling back on npm@2 path hierarchy
-                // TODO: Remove fallback after cordova-app-hello-world release
-                cfg.lib.www.url = path.join(__dirname, '..', '..', 'node_modules', 'cordova-app-hello-world');
-            }
+            cfg.lib.www.url = require.resolve('cordova-app-hello-world');
+            cfg.lib.www.template = true;
         }
 
         // TODO (kamrik): extend lazy_load for retrieval without caching to allow net urls for --src.
