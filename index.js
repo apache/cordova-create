@@ -157,9 +157,6 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             // Finally, Ready to start!
             events.emit('log', 'Creating a new cordova project.');
 
-            var isGit;
-            var isNPM;
-
             // If symlink, don't fetch
             if (cfg.lib.www.link) {
                 events.emit('verbose', 'Symlinking assets.');
@@ -167,8 +164,8 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             }
 
             events.emit('verbose', 'Copying assets."');
-            isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
-            isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url))) && !isGit;
+            var isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
+            var isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url))) && !isGit;
             // Always use cordova fetch to obtain the npm or git template
             if (isGit || isNPM) {
                 // Saved to .Cordova folder (ToDo: Delete installed template after using)
@@ -330,8 +327,7 @@ function copyTemplateFiles (templateDir, projectDir, isSubDir) {
         copyPath = path.resolve(templateDir);
         shell.cp('-R', copyPath, projectDir);
     } else {
-        var templateFiles; // Current file
-        templateFiles = fs.readdirSync(templateDir);
+        var templateFiles = fs.readdirSync(templateDir);
         // Remove directories, and files that are unwanted
         if (!isSubDir) {
             var excludes = ['package.json', 'RELEASENOTES.md', '.git', 'NOTICE', 'LICENSE', 'COPYRIGHT', '.npmignore'];
