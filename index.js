@@ -160,7 +160,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             // If symlink, don't fetch
             if (cfg.lib.www.link) {
                 events.emit('verbose', 'Symlinking assets.');
-                return Q(cfg.lib.www.url);
+                return cfg.lib.www.url;
             }
 
             events.emit('verbose', 'Copying assets."');
@@ -188,7 +188,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             // If assets are not online, resolve as a relative path on local computer
             } else {
                 cfg.lib.www.url = path.resolve(cfg.lib.www.url);
-                return Q(cfg.lib.www.url);
+                return cfg.lib.www.url;
             }
         })
         .then(function (input_directory) {
