@@ -1,10 +1,10 @@
 language: node_js
 sudo: false
 node_js:
-  - "4"
   - "6"
   - "8"
-install: 
+  - "10"
+install:
     - npm install
 script:
     - npm test
