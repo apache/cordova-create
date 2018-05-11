@@ -17,16 +17,18 @@
     under the License.
 */
 
-var path = require('path');
 var fs = require('fs');
-var shell = require('shelljs');
-var events = require('cordova-common').events;
+var path = require('path');
+var url = require('url');
+
 var Q = require('q');
+var shell = require('shelljs');
+var validateIdentifier = require('valid-identifier');
+
+var fetch = require('cordova-fetch');
+var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
-var fetch = require('cordova-fetch');
-var url = require('url');
-var validateIdentifier = require('valid-identifier');
 var CordovaLogger = require('cordova-common').CordovaLogger.get();
 
 // Global configuration paths
