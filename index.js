@@ -135,10 +135,6 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             cfg.lib.www.template = true;
         }
 
-        // TODO (kamrik): extend lazy_load for retrieval without caching to allow net urls for --src.
-        cfg.lib.www.version = cfg.lib.www.version || 'not_versioned';
-        cfg.lib.www.id = cfg.lib.www.id || 'dummy_id';
-
         // Make sure that the source www/ is not a direct ancestor of the
         // target www/, or else we will recursively copy forever. To do this,
         // we make sure that the shortest relative path from source-to-target
