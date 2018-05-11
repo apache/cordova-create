@@ -265,9 +265,8 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             }
 
             // Create basic project structure.
-            if (!fs.existsSync(path.join(dir, 'platforms'))) { shell.mkdir(path.join(dir, 'platforms')); }
-
-            if (!fs.existsSync(path.join(dir, 'plugins'))) { shell.mkdir(path.join(dir, 'plugins')); }
+            shell.mkdir('-p', path.join(dir, 'platforms'));
+            shell.mkdir('-p', path.join(dir, 'plugins'));
 
             var configPath = path.join(dir, 'config.xml');
             // only update config.xml if not a symlink
