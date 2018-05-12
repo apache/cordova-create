@@ -257,7 +257,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 // Pkjson.name should equal config's id.
                 if (cfg.id) {
                     pkgjson.name = cfg.id.toLowerCase();
-                } else if (!cfg.id) {
+                } else {
                     // Use default name.
                     pkgjson.name = 'helloworld';
                 }
