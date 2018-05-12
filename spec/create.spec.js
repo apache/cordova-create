@@ -28,11 +28,15 @@ var create = require('..');
 var helpers = require('./helpers');
 var events = require('cordova-common').events;
 var ConfigParser = require('cordova-common').ConfigParser;
+var CordovaLogger = require('cordova-common').CordovaLogger;
 
 var tmpDir = helpers.tmpDir('create_test');
 var appName = 'TestBase';
 var appId = 'org.testing';
 var project = path.join(tmpDir, appName);
+
+// Disable regular console output during tests
+CordovaLogger.get().setLevel(CordovaLogger.ERROR);
 
 // Global configuration paths
 var global_config_path = process.env.CORDOVA_HOME;
