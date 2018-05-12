@@ -20,6 +20,7 @@
 var helpers = require('./helpers');
 var path = require('path');
 var shell = require('shelljs');
+var requireFresh = require('import-fresh');
 var events = require('cordova-common').events;
 var ConfigParser = require('cordova-common').ConfigParser;
 var create = require('../index');
@@ -184,9 +185,8 @@ describe('create end-to-end', function () {
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.version()).toEqual('1.0.0');
-        delete require.cache[require.resolve(path.join(project, 'package.json'))];
         // Check that we got package.json (the correct one)
-        var pkjson = require(path.join(project, 'package.json'));
+        var pkjson = requireFresh(path.join(project, 'package.json'));
         // Pkjson.displayName should equal config's name.
         expect(pkjson.displayName).toEqual(appName);
         expect(pkjson.valid).toEqual('true');
@@ -201,8 +201,7 @@ describe('create end-to-end', function () {
         return create(project, appId, appName, {}, events)
             .then(checkProject)
             .then(function () {
-                delete require.cache[require.resolve(path.join(project, 'package.json'))];
-                var pkgJson = require(path.join(project, 'package.json'));
+                var pkgJson = requireFresh(path.join(project, 'package.json'));
                 // confirm default hello world app copies over package.json and it matched appId
                 expect(pkgJson.name).toEqual(appId);
             }).fail(function (err) {
@@ -232,13 +231,11 @@ describe('create end-to-end', function () {
             .then(checkProject)
             .then(function () {
                 shell.rm('-rf', project);
-                delete require.cache[require.resolve(templatePkgJsonPath)];
-                var pkgJson = require(templatePkgJsonPath);
+                var pkgJson = requireFresh(templatePkgJsonPath);
                 expect(pkgJson.version).toBe('1.0.0');
                 return create(project, appId, appName, configNPM);
             }).then(function () {
-                delete require.cache[require.resolve(templatePkgJsonPath)];
-                var pkgJson = require(templatePkgJsonPath);
+                var pkgJson = requireFresh(templatePkgJsonPath);
                 expect(semver.gt(pkgJson.version, '1.0.0')).toBeTruthy();
             }).fail(function (err) {
                 console.log(err && err.stack);
@@ -452,9 +449,8 @@ describe('create end-to-end', function () {
                 // Check that we got the right config.xml
                 expect(configXml.description()).toEqual('this is the correct config.xml');
 
-                delete require.cache[require.resolve(path.join(project, 'package.json'))];
                 // Check that we got package.json (the correct one) and it was changed
-                var pkjson = require(path.join(project, 'package.json'));
+                var pkjson = requireFresh(path.join(project, 'package.json'));
                 // Pkjson.name should equal config's id.
                 expect(pkjson.name).toEqual(appId.toLowerCase());
                 expect(pkjson.valid).toEqual('true');
