@@ -158,11 +158,9 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
 
             // If symlink, don't fetch
             if (cfg.lib.www.link) {
-                events.emit('verbose', 'Symlinking assets.');
                 return cfg.lib.www.url;
             }
 
-            events.emit('verbose', 'Copying assets."');
             var isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
             var isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url))) && !isGit;
             // Always use cordova fetch to obtain the npm or git template
@@ -218,10 +216,16 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
 
             try {
                 // Copy files from template to project
-                if (cfg.lib.www.template) { copyTemplateFiles(import_from_path, dir, isSubDir); }
+                if (cfg.lib.www.template) {
+                    events.emit('verbose', 'Copying assets.');
+                    copyTemplateFiles(import_from_path, dir, isSubDir);
+                }
 
                 // If --link, link merges, hooks, www, and config.xml (and/or copy to root)
-                if (cfg.lib.www.link) { linkFromTemplate(import_from_path, dir); }
+                if (cfg.lib.www.link) {
+                    events.emit('verbose', 'Symlinking assets.');
+                    linkFromTemplate(import_from_path, dir);
+                }
 
                 // If following were not copied/linked from template, copy from stock app hello world
                 // TODO: get stock package.json if template does not contain package.json;
