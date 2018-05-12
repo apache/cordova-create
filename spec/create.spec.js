@@ -17,15 +17,18 @@
     under the License.
 */
 
-var helpers = require('./helpers');
+var fs = require('fs');
 var path = require('path');
+
 var shell = require('shelljs');
+var semver = require('semver');
 var requireFresh = require('import-fresh');
+
+var create = require('..');
+var helpers = require('./helpers');
 var events = require('cordova-common').events;
 var ConfigParser = require('cordova-common').ConfigParser;
-var create = require('../index');
-var fs = require('fs');
-var semver = require('semver');
+
 var tmpDir = helpers.tmpDir('create_test');
 var appName = 'TestBase';
 var appId = 'org.testing';
