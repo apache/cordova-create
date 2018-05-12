@@ -23,6 +23,7 @@ var url = require('url');
 
 var Q = require('q');
 var shell = require('shelljs');
+var requireFresh = require('import-fresh');
 var validateIdentifier = require('valid-identifier');
 
 var fetch = require('cordova-fetch');
@@ -197,9 +198,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             // handle when input wants to specify sub-directory (specified in index.js as "dirname" export);
             var isSubDir = false;
             try {
-                // Delete cached require incase one exists
-                delete require.cache[require.resolve(input_directory)];
-                var templatePkg = require(input_directory);
+                var templatePkg = requireFresh(input_directory);
                 if (templatePkg && templatePkg.dirname) {
                     import_from_path = templatePkg.dirname;
                     isSubDir = true;
@@ -247,8 +246,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             var pkgjsonPath = path.join(dir, 'package.json');
             // Update package.json name and version fields
             if (fs.existsSync(pkgjsonPath)) {
-                delete require.cache[require.resolve(pkgjsonPath)];
-                var pkgjson = require(pkgjsonPath);
+                var pkgjson = requireFresh(pkgjsonPath);
 
                 // Pkjson.displayName should equal config's name.
                 if (cfg.name) {
