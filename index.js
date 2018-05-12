@@ -31,6 +31,8 @@ var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
 var CordovaLogger = require('cordova-common').CordovaLogger.get();
 
+const DEFAULT_VERSION = '1.0.0';
+
 // Global configuration paths
 var global_config_path = process.env.CORDOVA_HOME;
 if (!global_config_path) {
@@ -260,7 +262,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                     pkgjson.name = 'helloworld';
                 }
 
-                pkgjson.version = '1.0.0';
+                pkgjson.version = DEFAULT_VERSION;
                 fs.writeFileSync(pkgjsonPath, JSON.stringify(pkgjson, null, 4), 'utf8');
             }
 
@@ -271,11 +273,11 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             var configPath = path.join(dir, 'config.xml');
             // only update config.xml if not a symlink
             if (!fs.lstatSync(configPath).isSymbolicLink()) {
-                // Write out id and name to config.xml; set version to 1.0.0 (to match package.json default version)
+                // Write out id, name and default version to config.xml
                 var conf = new ConfigParser(configPath);
                 if (cfg.id) conf.setPackageName(cfg.id);
                 if (cfg.name) conf.setName(cfg.name);
-                conf.setVersion('1.0.0');
+                conf.setVersion(DEFAULT_VERSION);
                 conf.write();
             }
         });
