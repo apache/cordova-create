@@ -19,9 +19,9 @@
 
 var fs = require('fs');
 var path = require('path');
-var url = require('url');
 
 var Q = require('q');
+var isUrl = require('is-url');
 var shell = require('shelljs');
 var requireFresh = require('import-fresh');
 var validateIdentifier = require('valid-identifier');
@@ -325,15 +325,6 @@ function copyTemplateFiles (templateDir, projectDir, isSubDir) {
             shell.cp('-R', copyPath, projectDir);
         }
     }
-}
-
-/**
- * @param  {String} value
- * @return {Boolean} is the input value a url?
- */
-function isUrl (value) {
-    var u = value && url.parse(value);
-    return !!(u && u.protocol && u.protocol.length > 2); // Account for windows c:/ paths
 }
 
 /**
