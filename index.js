@@ -18,6 +18,7 @@
 */
 
 var fs = require('fs');
+var os = require('os');
 var path = require('path');
 
 var Q = require('q');
@@ -35,11 +36,8 @@ var CordovaLogger = require('cordova-common').CordovaLogger.get();
 const DEFAULT_VERSION = '1.0.0';
 
 // Global configuration paths
-var global_config_path = process.env.CORDOVA_HOME;
-if (!global_config_path) {
-    var HOME = process.env[(process.platform.slice(0, 3) === 'win') ? 'USERPROFILE' : 'HOME'];
-    global_config_path = path.join(HOME, '.cordova');
-}
+var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
+
 /**
  * Sets up to forward events to another instance, or log console.
  * This will make the create internal events visible outside
