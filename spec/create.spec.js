@@ -96,20 +96,18 @@ var configNPM = {
 };
 
 describe('cordova create checks for valid-identifier', function () {
-    it('should reject reserved words from start of id', function (done) {
-        create('projectPath', 'int.bob', 'appName', {}, events)
+    it('should reject reserved words from start of id', function () {
+        return create('projectPath', 'int.bob', 'appName', {}, events)
             .fail(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
-            })
-            .fin(done);
+            });
     }, 60000);
 
-    it('should reject reserved words from end of id', function (done) {
-        create('projectPath', 'bob.class', 'appName', {}, events)
+    it('should reject reserved words from end of id', function () {
+        return create('projectPath', 'bob.class', 'appName', {}, events)
             .fail(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
-            })
-            .fin(done);
+            });
     }, 60000);
 });
 
@@ -202,7 +200,7 @@ describe('create end-to-end', function () {
         expect(configXml.description()).toEqual('this is the correct config.xml');
     }
 
-    it('should successfully run without template and use default hello-world app', function (done) {
+    it('should successfully run without template and use default hello-world app', function () {
         // Create a real project with no template
         // use default cordova-app-hello-world app
         return create(project, appId, appName, {}, events)
@@ -211,25 +209,16 @@ describe('create end-to-end', function () {
                 var pkgJson = requireFresh(path.join(project, 'package.json'));
                 // confirm default hello world app copies over package.json and it matched appId
                 expect(pkgJson.name).toEqual(appId);
-            }).fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            });
     }, 60000);
 
-    it('should successfully run with Git URL', function (done) {
+    it('should successfully run with Git URL', function () {
         // Create a real project with gitURL as template
         return create(project, appId, appName, configGit, events)
-            .then(checkProject)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            .then(checkProject);
     }, 60000);
 
-    it('should successfully run with NPM package and not use old cache of template on second create', function (done) {
+    it('should successfully run with NPM package and not use old cache of template on second create', function () {
         var templatePkgJsonPath = path.join(global_config_path, 'node_modules', 'phonegap-template-vue-f7-tabs', 'package.json');
         // Create a real project with npm module as template
         // tests cache clearing of npm template
@@ -244,14 +233,10 @@ describe('create end-to-end', function () {
             }).then(function () {
                 var pkgJson = requireFresh(templatePkgJsonPath);
                 expect(semver.gt(pkgJson.version, '1.0.0')).toBeTruthy();
-            }).fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            });
     }, 60000);
 
-    it('should successfully run with template not having a package.json at toplevel', function (done) {
+    it('should successfully run with template not having a package.json at toplevel', function () {
         // Call cordova create with no args, should return help.
         var config = {
             lib: {
@@ -269,15 +254,10 @@ describe('create end-to-end', function () {
                 // Check that we got the right config.xml
                 var configXml = new ConfigParser(path.join(project, 'config.xml'));
                 expect(configXml.description()).toEqual('this is the very correct config.xml');
-            })
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            });
     }, 60000);
 
-    it('should successfully run with template having package.json and no sub directory', function (done) {
+    it('should successfully run with template having package.json and no sub directory', function () {
         // Call cordova create with no args, should return help.
         var config = {
             lib: {
@@ -290,15 +270,10 @@ describe('create end-to-end', function () {
         };
         // Create a real project
         return create(project, appId, appName, config, events)
-            .then(checkProject)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            .then(checkProject);
     }, 60000);
 
-    it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function (done) {
+    it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
         // Call cordova create with no args, should return help.
         var config = {
             lib: {
@@ -312,40 +287,25 @@ describe('create end-to-end', function () {
 
         // Create a real project
         return create(project, appId, appName, config, events)
-            .then(checkProject)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            .then(checkProject);
     }, 60000);
 
-    it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function (done) {
+    it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
         // Call cordova create with no args, should return help.
         var config = configSubDirPkgJson;
         return create(project, appId, appName, config, events)
-            .then(checkSubDir)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            .then(checkSubDir);
     }, 60000);
 
-    it('should successfully run config.xml in the www folder and move it outside', function (done) {
+    it('should successfully run config.xml in the www folder and move it outside', function () {
         // Call cordova create with no args, should return help.
         var config = configConfigInWww;
         // Create a real project
         return create(project, appId, appName, config, events)
-            .then(checkConfigXml)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            .then(checkConfigXml);
     }, 60000);
 
-    it('should successfully run with www folder as the template', function (done) {
+    it('should successfully run with www folder as the template', function () {
         var config = {
             lib: {
                 www: {
@@ -356,16 +316,11 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkConfigXml)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
+            .then(checkConfigXml);
     }, 60000);
 
     describe('when --link-to is provided', function () {
-        it('when passed www folder should not move www/config.xml, only copy and update', function (done) {
+        it('when passed www folder should not move www/config.xml, only copy and update', function () {
             function checkSymWWW () {
                 // Check if top level dirs exist.
                 var dirs = ['hooks', 'platforms', 'plugins', 'www'];
@@ -419,16 +374,12 @@ describe('create end-to-end', function () {
                         // Allow symlink error if not in admin mode
                         expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
                     } else {
-                        if (err) {
-                            console.log(err.stack);
-                        }
-                        expect(err).toBeUndefined();
+                        throw err;
                     }
-                })
-                .fin(done);
+                });
         }, 60000);
 
-        it('with subdirectory should not update symlinked project/config.xml', function (done) {
+        it('with subdirectory should not update symlinked project/config.xml', function () {
             function checkSymSubDir () {
                 // Check if top level dirs exist.
                 var dirs = ['hooks', 'platforms', 'plugins', 'www'];
@@ -479,16 +430,12 @@ describe('create end-to-end', function () {
                         // Allow symlink error if not in admin mode
                         expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
                     } else {
-                        if (err) {
-                            console.log(err.stack);
-                        }
-                        expect(err).toBeUndefined();
+                        throw err;
                     }
-                })
-                .fin(done);
+                });
         }, 60000);
 
-        it('with no config should create one and update it', function (done) {
+        it('with no config should create one and update it', function () {
             function checkSymNoConfig () {
                 // Check if top level dirs exist.
                 var dirs = ['hooks', 'platforms', 'plugins', 'www'];
@@ -529,13 +476,9 @@ describe('create end-to-end', function () {
                         // Allow symlink error if not in admin mode
                         expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
                     } else {
-                        if (err) {
-                            console.log(err.stack);
-                        }
-                        expect(err).toBeUndefined();
+                        throw err;
                     }
-                })
-                .fin(done);
+                });
         }, 60000);
 
     });
