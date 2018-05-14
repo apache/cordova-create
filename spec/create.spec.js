@@ -98,14 +98,14 @@ var configNPM = {
 describe('cordova create checks for valid-identifier', function () {
     it('should reject reserved words from start of id', function () {
         return create('projectPath', 'int.bob', 'appName', {}, events)
-            .fail(function (err) {
+            .catch(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
             });
     }, 60000);
 
     it('should reject reserved words from end of id', function () {
         return create('projectPath', 'bob.class', 'appName', {}, events)
-            .fail(function (err) {
+            .catch(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
             });
     }, 60000);
@@ -369,7 +369,7 @@ describe('create end-to-end', function () {
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymWWW)
-                .fail(function (err) {
+                .catch(function (err) {
                     if (process.platform.slice(0, 3) === 'win') {
                         // Allow symlink error if not in admin mode
                         expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
@@ -425,7 +425,7 @@ describe('create end-to-end', function () {
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymSubDir)
-                .fail(function (err) {
+                .catch(function (err) {
                     if (process.platform.slice(0, 3) === 'win') {
                         // Allow symlink error if not in admin mode
                         expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
@@ -471,7 +471,7 @@ describe('create end-to-end', function () {
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymNoConfig)
-                .fail(function (err) {
+                .catch(function (err) {
                     if (process.platform.slice(0, 3) === 'win') {
                         // Allow symlink error if not in admin mode
                         expect(err.message).toBe('Symlinks on Windows require Administrator privileges');

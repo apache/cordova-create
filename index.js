@@ -21,7 +21,7 @@ var fs = require('fs');
 var os = require('os');
 var path = require('path');
 
-var Q = require('q');
+var Promise = require('q');
 var isUrl = require('is-url');
 var shell = require('shelljs');
 var requireFresh = require('import-fresh');
@@ -67,7 +67,7 @@ function setupEvents (externalEventEmitter) {
  **/
 // Returns a promise.
 module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
-    return Q.fcall(function () {
+    return Promise.resolve().then(function () {
         events = setupEvents(extEvents);
         events.emit('verbose', 'Using detached cordova-create');
 
@@ -175,7 +175,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 }
                 events.emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, tempDest, {})
-                    .fail(function (err) {
+                    .catch(function (err) {
                         events.emit('error', '\x1B[1m \x1B[31m Error from Cordova Fetch: ' + err.message);
                         events.emit('error', 'The template you are trying to use is invalid.' +
                         ' Make sure you follow the template guide found here https://cordova.apache.org/docs/en/latest/guide/cli/template.html.' +
