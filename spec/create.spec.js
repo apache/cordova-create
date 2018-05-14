@@ -237,7 +237,6 @@ describe('create end-to-end', function () {
     }, 60000);
 
     it('should successfully run with template not having a package.json at toplevel', function () {
-        // Call cordova create with no args, should return help.
         var config = {
             lib: {
                 www: {
@@ -247,7 +246,6 @@ describe('create end-to-end', function () {
                 }
             }
         };
-        // Create a real project
         return create(project, appId, appName, config, events)
             .then(checkProject)
             .then(function () {
@@ -258,7 +256,6 @@ describe('create end-to-end', function () {
     });
 
     it('should successfully run with template having package.json and no sub directory', function () {
-        // Call cordova create with no args, should return help.
         var config = {
             lib: {
                 www: {
@@ -268,13 +265,11 @@ describe('create end-to-end', function () {
                 }
             }
         };
-        // Create a real project
         return create(project, appId, appName, config, events)
             .then(checkProject);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
-        // Call cordova create with no args, should return help.
         var config = {
             lib: {
                 www: {
@@ -284,23 +279,18 @@ describe('create end-to-end', function () {
                 }
             }
         };
-
-        // Create a real project
         return create(project, appId, appName, config, events)
             .then(checkProject);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
-        // Call cordova create with no args, should return help.
         var config = configSubDirPkgJson;
         return create(project, appId, appName, config, events)
             .then(checkSubDir);
     });
 
     it('should successfully run config.xml in the www folder and move it outside', function () {
-        // Call cordova create with no args, should return help.
         var config = configConfigInWww;
-        // Create a real project
         return create(project, appId, appName, config, events)
             .then(checkConfigXml);
     });
