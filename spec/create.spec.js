@@ -28,6 +28,7 @@ var requireFresh = require('import-fresh');
 var create = require('..');
 var helpers = require('./helpers');
 var events = require('cordova-common').events;
+var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
 var CordovaLogger = require('cordova-common').CordovaLogger;
 
@@ -42,6 +43,24 @@ CordovaLogger.get().setLevel(CordovaLogger.ERROR);
 // Global configuration paths
 var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
 
+// Expect promise to get rejected with a reason matching expectedReason
+function expectRejection (promise, expectedReason) {
+    return promise.then(
+        () => fail('Expected promise to be rejected'),
+        reason => {
+            if (expectedReason instanceof Error) {
+                expect(reason instanceof expectedReason.constructor).toBeTruthy();
+                expect(reason.message).toContain(expectedReason.message);
+            } else if (typeof expectedReason === 'function') {
+                expect(expectedReason(reason)).toBeTruthy();
+            } else if (expectedReason !== undefined) {
+                expect(reason).toBe(expectedReason);
+            } else {
+                expect().nothing();
+            }
+        });
+}
+
 // Setup and teardown test dirs
 beforeEach(function () {
     shell.rm('-rf', project);
@@ -53,18 +72,14 @@ afterEach(function () {
 });
 
 describe('cordova create checks for valid-identifier', function () {
+    const error = new CordovaError('is not a valid identifier');
+
     it('should reject reserved words from start of id', function () {
-        return create(project, 'int.bob', appName, {}, events)
-            .catch(function (err) {
-                expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
-            });
+        return expectRejection(create(project, 'int.bob', appName, {}, events), error);
     });
 
     it('should reject reserved words from end of id', function () {
-        return create(project, 'bob.class', appName, {}, events)
-            .catch(function (err) {
-                expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
-            });
+        return expectRejection(create(project, 'bob.class', appName, {}, events), error);
     });
 });
 
