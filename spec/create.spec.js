@@ -333,6 +333,12 @@ describe('create end-to-end', function () {
             .then(checkConfigXml);
     });
 
+    it('should successfully run with existing, empty destination', function () {
+        shell.mkdir('-p', project);
+        return create(project, appId, appName, {}, events)
+            .then(checkProject);
+    });
+
     describe('when --link-to is provided', function () {
         function allowSymlinkErrorOnWindows (err) {
             const onWindows = process.platform.slice(0, 3) === 'win';
@@ -484,5 +490,69 @@ describe('create end-to-end', function () {
                 .catch(allowSymlinkErrorOnWindows);
         });
 
+    });
+});
+
+describe('when shit happens', function () {
+    it('should fail when dir is missing', function () {
+        return expectRejection(
+            create(null, appId, appName, {}, events),
+            new CordovaError('Directory not specified')
+        );
+    });
+
+    it('should fail when dir already exists', function () {
+        return expectRejection(
+            create(__dirname, appId, appName, {}, events),
+            new CordovaError('Path already exists and is not empty')
+        );
+    });
+
+    it('should fail when destination is inside template', function () {
+        const config = {
+            lib: {
+                www: {
+                    url: path.join(tmpDir, 'template')
+                }
+            }
+        };
+        const destination = path.join(config.lib.www.url, 'destination');
+        return expectRejection(
+            create(destination, appId, appName, config, events),
+            new CordovaError('inside the template')
+        );
+    });
+
+    it('should fail when fetch fails', function () {
+        const config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: 'http://localhost:123456789/cordova-create'
+                }
+            }
+        };
+        const fetchError = new Error('Fetch fail');
+        const failingFetch = jasmine.createSpy('failingFetch')
+            .and.callFake(() => Promise.reject(fetchError));
+        return expectRejection(
+            createWith({fetch: failingFetch})(project, appId, appName, config),
+            fetchError
+        );
+
+    });
+
+    it('should fail when template does not exist', function () {
+        const config = {
+            lib: {
+                www: {
+                    url: path.join(__dirname, 'doesnotexist')
+                }
+            }
+        };
+        return expectRejection(
+            create(project, appId, appName, config, events),
+            new CordovaError('Could not find directory')
+        );
     });
 });
