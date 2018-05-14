@@ -45,56 +45,6 @@ if (!global_config_path) {
     global_config_path = path.join(HOME, '.cordova');
 }
 
-var configSubDirPkgJson = {
-    lib: {
-        www: {
-            template: true,
-            url: path.join(__dirname, 'templates', 'withsubdirectory_package_json'),
-            version: ''
-        }
-    }
-};
-
-var configConfigInWww = {
-    lib: {
-        www: {
-            template: true,
-            url: path.join(__dirname, 'templates', 'config_in_www'),
-            version: ''
-        }
-    }
-};
-
-var configGit = {
-    lib: {
-        www: {
-            url: 'https://github.com/apache/cordova-app-hello-world',
-            template: true,
-            version: 'not_versioned'
-        }
-    }
-};
-
-var configNPMold = {
-    lib: {
-        www: {
-            template: true,
-            url: 'phonegap-template-vue-f7-tabs@1.0.0',
-            version: ''
-        }
-    }
-};
-
-var configNPM = {
-    lib: {
-        www: {
-            template: true,
-            url: 'phonegap-template-vue-f7-tabs',
-            version: ''
-        }
-    }
-};
-
 describe('cordova create checks for valid-identifier', function () {
     it('should reject reserved words from start of id', function () {
         return create('projectPath', 'int.bob', 'appName', {}, events)
@@ -213,8 +163,17 @@ describe('create end-to-end', function () {
     });
 
     it('should successfully run with Git URL', function () {
-        // Create a real project with gitURL as template
-        return create(project, appId, appName, configGit, events)
+        // Create a real project with git URL as template
+        var config = {
+            lib: {
+                www: {
+                    url: 'https://github.com/apache/cordova-app-hello-world',
+                    template: true,
+                    version: 'not_versioned'
+                }
+            }
+        };
+        return create(project, appId, appName, config, events)
             .then(checkProject);
     }, 60000);
 
@@ -223,6 +182,24 @@ describe('create end-to-end', function () {
         // Create a real project with npm module as template
         // tests cache clearing of npm template
         // uses phonegap-template-vue-f7-tabs
+        var configNPMold = {
+            lib: {
+                www: {
+                    template: true,
+                    url: 'phonegap-template-vue-f7-tabs@1.0.0',
+                    version: ''
+                }
+            }
+        };
+        var configNPM = {
+            lib: {
+                www: {
+                    template: true,
+                    url: 'phonegap-template-vue-f7-tabs',
+                    version: ''
+                }
+            }
+        };
         return create(project, appId, appName, configNPMold)
             .then(checkProject)
             .then(function () {
@@ -284,13 +261,29 @@ describe('create end-to-end', function () {
     });
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
-        var config = configSubDirPkgJson;
+        var config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: path.join(__dirname, 'templates', 'withsubdirectory_package_json'),
+                    version: ''
+                }
+            }
+        };
         return create(project, appId, appName, config, events)
             .then(checkSubDir);
     });
 
     it('should successfully run config.xml in the www folder and move it outside', function () {
-        var config = configConfigInWww;
+        var config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: path.join(__dirname, 'templates', 'config_in_www'),
+                    version: ''
+                }
+            }
+        };
         return create(project, appId, appName, config, events)
             .then(checkConfigXml);
     });
