@@ -18,11 +18,9 @@
 */
 
 var fs = require('fs');
-var os = require('os');
 var path = require('path');
 
 var shell = require('shelljs');
-var semver = require('semver');
 var rewire = require('rewire');
 var requireFresh = require('import-fresh');
 
@@ -40,9 +38,6 @@ var project = path.join(tmpDir, appName);
 
 // Disable regular console output during tests
 CordovaLogger.get().setLevel(CordovaLogger.ERROR);
-
-// Global configuration paths
-var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
 
 function createWith (rewiring) {
     return (...args) => create.__with__(rewiring)(() => create(...args));
@@ -210,21 +205,29 @@ describe('create end-to-end', function () {
             .then(checkProject);
     });
 
-    it('should successfully run with NPM package and not use old cache of template on second create', function () {
-        var templatePkgJsonPath = path.join(global_config_path, 'node_modules', 'phonegap-template-vue-f7-tabs', 'package.json');
+    it('should successfully run with NPM package', function () {
         // Create a real project with npm module as template
-        // tests cache clearing of npm template
-        // uses phonegap-template-vue-f7-tabs
-        var configNPMold = {
+        var config = {
             lib: {
                 www: {
                     template: true,
-                    url: 'phonegap-template-vue-f7-tabs@1.0.0',
+                    url: 'phonegap-template-vue-f7-tabs@1',
                     version: ''
                 }
             }
         };
-        var configNPM = {
+        return createWithMockFetch(project, appId, appName, config, events)
+            .then(fetchSpy => {
+                expect(fetchSpy).toHaveBeenCalledTimes(1);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
+            })
+            .then(checkProject);
+    });
+
+    it('should successfully run with NPM package and explicitly fetch latest if no version is given', function () {
+        // Create a real project with npm module as template
+        // TODO fetch should be responsible for the cache busting part of this test
+        var config = {
             lib: {
                 www: {
                     template: true,
@@ -233,18 +236,13 @@ describe('create end-to-end', function () {
                 }
             }
         };
-        return create(project, appId, appName, configNPMold)
-            .then(checkProject)
-            .then(function () {
-                shell.rm('-rf', project);
-                var pkgJson = requireFresh(templatePkgJsonPath);
-                expect(pkgJson.version).toBe('1.0.0');
-                return create(project, appId, appName, configNPM);
-            }).then(function () {
-                var pkgJson = requireFresh(templatePkgJsonPath);
-                expect(semver.gt(pkgJson.version, '1.0.0')).toBeTruthy();
-            });
-    }, 60000);
+        return createWithMockFetch(project, appId, appName, config, events)
+            .then(fetchSpy => {
+                expect(fetchSpy).toHaveBeenCalledTimes(1);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url + '@latest');
+            })
+            .then(checkProject);
+    });
 
     it('should successfully run with template not having a package.json at toplevel', function () {
         var config = {
