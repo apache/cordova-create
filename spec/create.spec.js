@@ -18,6 +18,7 @@
 */
 
 var fs = require('fs');
+var os = require('os');
 var path = require('path');
 
 var shell = require('shelljs');
@@ -39,11 +40,7 @@ var project = path.join(tmpDir, appName);
 CordovaLogger.get().setLevel(CordovaLogger.ERROR);
 
 // Global configuration paths
-var global_config_path = process.env.CORDOVA_HOME;
-if (!global_config_path) {
-    var HOME = process.env[(process.platform.slice(0, 3) === 'win') ? 'USERPROFILE' : 'HOME'];
-    global_config_path = path.join(HOME, '.cordova');
-}
+var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
 
 // Setup and teardown test dirs
 beforeEach(function () {
