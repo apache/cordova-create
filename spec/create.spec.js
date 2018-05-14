@@ -101,14 +101,14 @@ describe('cordova create checks for valid-identifier', function () {
             .catch(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
             });
-    }, 60000);
+    });
 
     it('should reject reserved words from end of id', function () {
         return create('projectPath', 'bob.class', 'appName', {}, events)
             .catch(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
             });
-    }, 60000);
+    });
 });
 
 describe('create end-to-end', function () {
@@ -210,7 +210,7 @@ describe('create end-to-end', function () {
                 // confirm default hello world app copies over package.json and it matched appId
                 expect(pkgJson.name).toEqual(appId);
             });
-    }, 60000);
+    });
 
     it('should successfully run with Git URL', function () {
         // Create a real project with gitURL as template
@@ -255,7 +255,7 @@ describe('create end-to-end', function () {
                 var configXml = new ConfigParser(path.join(project, 'config.xml'));
                 expect(configXml.description()).toEqual('this is the very correct config.xml');
             });
-    }, 60000);
+    });
 
     it('should successfully run with template having package.json and no sub directory', function () {
         // Call cordova create with no args, should return help.
@@ -271,7 +271,7 @@ describe('create end-to-end', function () {
         // Create a real project
         return create(project, appId, appName, config, events)
             .then(checkProject);
-    }, 60000);
+    });
 
     it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
         // Call cordova create with no args, should return help.
@@ -288,14 +288,14 @@ describe('create end-to-end', function () {
         // Create a real project
         return create(project, appId, appName, config, events)
             .then(checkProject);
-    }, 60000);
+    });
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
         // Call cordova create with no args, should return help.
         var config = configSubDirPkgJson;
         return create(project, appId, appName, config, events)
             .then(checkSubDir);
-    }, 60000);
+    });
 
     it('should successfully run config.xml in the www folder and move it outside', function () {
         // Call cordova create with no args, should return help.
@@ -303,7 +303,7 @@ describe('create end-to-end', function () {
         // Create a real project
         return create(project, appId, appName, config, events)
             .then(checkConfigXml);
-    }, 60000);
+    });
 
     it('should successfully run with www folder as the template', function () {
         var config = {
@@ -317,7 +317,7 @@ describe('create end-to-end', function () {
         };
         return create(project, appId, appName, config, events)
             .then(checkConfigXml);
-    }, 60000);
+    });
 
     describe('when --link-to is provided', function () {
         it('when passed www folder should not move www/config.xml, only copy and update', function () {
@@ -377,7 +377,7 @@ describe('create end-to-end', function () {
                         throw err;
                     }
                 });
-        }, 60000);
+        });
 
         it('with subdirectory should not update symlinked project/config.xml', function () {
             function checkSymSubDir () {
@@ -433,7 +433,7 @@ describe('create end-to-end', function () {
                         throw err;
                     }
                 });
-        }, 60000);
+        });
 
         it('with no config should create one and update it', function () {
             function checkSymNoConfig () {
@@ -479,7 +479,7 @@ describe('create end-to-end', function () {
                         throw err;
                     }
                 });
-        }, 60000);
+        });
 
     });
 });
