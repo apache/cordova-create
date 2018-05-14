@@ -23,9 +23,10 @@ var path = require('path');
 
 var shell = require('shelljs');
 var semver = require('semver');
+var rewire = require('rewire');
 var requireFresh = require('import-fresh');
 
-var create = require('..');
+var create = rewire('..');
 var helpers = require('./helpers');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
@@ -42,6 +43,22 @@ CordovaLogger.get().setLevel(CordovaLogger.ERROR);
 
 // Global configuration paths
 var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
+
+function createWith (rewiring) {
+    return (...args) => create.__with__(rewiring)(() => create(...args));
+}
+
+// Calls create with mocked fetch to not depend on the outside world
+function createWithMockFetch (dir, id, name, cfg, events) {
+    const mockFetchDest = path.join(tmpDir, 'mockFetchDest');
+    const templateDir = path.dirname(require.resolve('cordova-app-hello-world'));
+    const fetchSpy = jasmine.createSpy('fetchSpy')
+        .and.callFake(() => Promise.resolve(mockFetchDest));
+
+    shell.cp('-R', templateDir, mockFetchDest);
+    return createWith({fetch: fetchSpy})(dir, id, name, cfg, events)
+        .then(() => fetchSpy);
+}
 
 // Expect promise to get rejected with a reason matching expectedReason
 function expectRejection (promise, expectedReason) {
@@ -185,9 +202,13 @@ describe('create end-to-end', function () {
                 }
             }
         };
-        return create(project, appId, appName, config, events)
+        return createWithMockFetch(project, appId, appName, config, events)
+            .then(fetchSpy => {
+                expect(fetchSpy).toHaveBeenCalledTimes(1);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
+            })
             .then(checkProject);
-    }, 60000);
+    });
 
     it('should successfully run with NPM package and not use old cache of template on second create', function () {
         var templatePkgJsonPath = path.join(global_config_path, 'node_modules', 'phonegap-template-vue-f7-tabs', 'package.json');
