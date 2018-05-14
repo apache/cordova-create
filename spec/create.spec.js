@@ -320,6 +320,16 @@ describe('create end-to-end', function () {
     });
 
     describe('when --link-to is provided', function () {
+        function allowSymlinkErrorOnWindows (err) {
+            const onWindows = process.platform.slice(0, 3) === 'win';
+            const isSymlinkError = err && String(err.message).startsWith('Symlinks on Windows');
+            if (onWindows && isSymlinkError) {
+                pending(err.message);
+            } else {
+                throw err;
+            }
+        }
+
         it('when passed www folder should not move www/config.xml, only copy and update', function () {
             function checkSymWWW () {
                 // Check if top level dirs exist.
@@ -369,14 +379,7 @@ describe('create end-to-end', function () {
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymWWW)
-                .catch(function (err) {
-                    if (process.platform.slice(0, 3) === 'win') {
-                        // Allow symlink error if not in admin mode
-                        expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
-                    } else {
-                        throw err;
-                    }
-                });
+                .catch(allowSymlinkErrorOnWindows);
         });
 
         it('with subdirectory should not update symlinked project/config.xml', function () {
@@ -425,14 +428,7 @@ describe('create end-to-end', function () {
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymSubDir)
-                .catch(function (err) {
-                    if (process.platform.slice(0, 3) === 'win') {
-                        // Allow symlink error if not in admin mode
-                        expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
-                    } else {
-                        throw err;
-                    }
-                });
+                .catch(allowSymlinkErrorOnWindows);
         });
 
         it('with no config should create one and update it', function () {
@@ -471,14 +467,7 @@ describe('create end-to-end', function () {
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymNoConfig)
-                .catch(function (err) {
-                    if (process.platform.slice(0, 3) === 'win') {
-                        // Allow symlink error if not in admin mode
-                        expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
-                    } else {
-                        throw err;
-                    }
-                });
+                .catch(allowSymlinkErrorOnWindows);
         });
 
     });
