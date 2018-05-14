@@ -45,16 +45,26 @@ if (!global_config_path) {
     global_config_path = path.join(HOME, '.cordova');
 }
 
+// Setup and teardown test dirs
+beforeEach(function () {
+    shell.rm('-rf', project);
+    shell.mkdir('-p', tmpDir);
+});
+afterEach(function () {
+    process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
+    shell.rm('-rf', tmpDir);
+});
+
 describe('cordova create checks for valid-identifier', function () {
     it('should reject reserved words from start of id', function () {
-        return create('projectPath', 'int.bob', 'appName', {}, events)
+        return create(project, 'int.bob', appName, {}, events)
             .catch(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
             });
     });
 
     it('should reject reserved words from end of id', function () {
-        return create('projectPath', 'bob.class', 'appName', {}, events)
+        return create(project, 'bob.class', appName, {}, events)
             .catch(function (err) {
                 expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
             });
@@ -62,16 +72,6 @@ describe('cordova create checks for valid-identifier', function () {
 });
 
 describe('create end-to-end', function () {
-
-    beforeEach(function () {
-        shell.rm('-rf', project);
-        shell.mkdir('-p', tmpDir);
-    });
-
-    afterEach(function () {
-        process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
-        shell.rm('-rf', tmpDir);
-    });
 
     function checkProject () {
         // Check if top level dirs exist.
