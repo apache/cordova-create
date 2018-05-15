@@ -17,21 +17,61 @@
     under the License.
 */
 
-var path = require('path');
-var fs = require('fs');
-var shell = require('shelljs');
-var os = require('os');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
-module.exports.tmpDir = function (subdir) {
-    var dir = path.join(os.tmpdir(), 'e2e-test');
-    if (subdir) {
-        dir = path.join(dir, subdir);
-    }
-    if (fs.existsSync(dir)) {
-        shell.rm('-rf', dir);
-    }
-    shell.mkdir('-p', dir);
-    return dir;
+const rewire = require('rewire');
+const shell = require('shelljs');
+
+// Disable regular console output during tests
+const CordovaLogger = require('cordova-common').CordovaLogger;
+CordovaLogger.get().setLevel(CordovaLogger.ERROR);
+
+// Temporary directory to use for all tests
+const tmpDir = path.join(os.tmpdir(), 'e2e-test', 'create_test');
+
+// Returns a version of create with its local scope rewired
+const create = rewire('..');
+function createWith (rewiring) {
+    return (...args) => create.__with__(rewiring)(() => create(...args));
+}
+
+// Calls create with mocked fetch to not depend on the outside world
+function createWithMockFetch (dir, id, name, cfg, events) {
+    const mockFetchDest = path.join(tmpDir, 'mockFetchDest');
+    const templateDir = path.dirname(require.resolve('cordova-app-hello-world'));
+    const fetchSpy = jasmine.createSpy('fetchSpy')
+        .and.callFake(() => Promise.resolve(mockFetchDest));
+
+    shell.cp('-R', templateDir, mockFetchDest);
+    return createWith({fetch: fetchSpy})(dir, id, name, cfg, events)
+        .then(() => fetchSpy);
+}
+
+// Expect promise to get rejected with a reason matching expectedReason
+function expectRejection (promise, expectedReason) {
+    return promise.then(
+        () => fail('Expected promise to be rejected'),
+        reason => {
+            if (expectedReason instanceof Error) {
+                expect(reason instanceof expectedReason.constructor).toBeTruthy();
+                expect(reason.message).toContain(expectedReason.message);
+            } else if (typeof expectedReason === 'function') {
+                expect(expectedReason(reason)).toBeTruthy();
+            } else if (expectedReason !== undefined) {
+                expect(reason).toBe(expectedReason);
+            } else {
+                expect().nothing();
+            }
+        });
+}
+
+module.exports = {
+    tmpDir,
+    createWith,
+    createWithMockFetch,
+    expectRejection
 };
 
 // Add the toExist matcher.

@@ -21,57 +21,17 @@ var fs = require('fs');
 var path = require('path');
 
 var shell = require('shelljs');
-var rewire = require('rewire');
 var requireFresh = require('import-fresh');
 
-var create = rewire('..');
-var helpers = require('./helpers');
+var create = require('..');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
-var CordovaLogger = require('cordova-common').CordovaLogger;
+const {tmpDir, createWith, createWithMockFetch, expectRejection} = require('./helpers');
 
-var tmpDir = helpers.tmpDir('create_test');
 var appName = 'TestBase';
 var appId = 'org.testing';
 var project = path.join(tmpDir, appName);
-
-// Disable regular console output during tests
-CordovaLogger.get().setLevel(CordovaLogger.ERROR);
-
-function createWith (rewiring) {
-    return (...args) => create.__with__(rewiring)(() => create(...args));
-}
-
-// Calls create with mocked fetch to not depend on the outside world
-function createWithMockFetch (dir, id, name, cfg, events) {
-    const mockFetchDest = path.join(tmpDir, 'mockFetchDest');
-    const templateDir = path.dirname(require.resolve('cordova-app-hello-world'));
-    const fetchSpy = jasmine.createSpy('fetchSpy')
-        .and.callFake(() => Promise.resolve(mockFetchDest));
-
-    shell.cp('-R', templateDir, mockFetchDest);
-    return createWith({fetch: fetchSpy})(dir, id, name, cfg, events)
-        .then(() => fetchSpy);
-}
-
-// Expect promise to get rejected with a reason matching expectedReason
-function expectRejection (promise, expectedReason) {
-    return promise.then(
-        () => fail('Expected promise to be rejected'),
-        reason => {
-            if (expectedReason instanceof Error) {
-                expect(reason instanceof expectedReason.constructor).toBeTruthy();
-                expect(reason.message).toContain(expectedReason.message);
-            } else if (typeof expectedReason === 'function') {
-                expect(expectedReason(reason)).toBeTruthy();
-            } else if (expectedReason !== undefined) {
-                expect(reason).toBe(expectedReason);
-            } else {
-                expect().nothing();
-            }
-        });
-}
 
 // Setup and teardown test dirs
 beforeEach(function () {
