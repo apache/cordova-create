@@ -152,8 +152,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     url: 'https://github.com/apache/cordova-app-hello-world',
-                    template: true,
-                    version: 'not_versioned'
+                    template: true
                 }
             }
         };
@@ -171,8 +170,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: 'phonegap-template-vue-f7-tabs@1',
-                    version: ''
+                    url: 'phonegap-template-vue-f7-tabs@1'
                 }
             }
         };
@@ -191,8 +189,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: 'phonegap-template-vue-f7-tabs',
-                    version: ''
+                    url: 'phonegap-template-vue-f7-tabs'
                 }
             }
         };
@@ -209,8 +206,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'nopackage_json'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'nopackage_json')
                 }
             }
         };
@@ -228,8 +224,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'withpackage_json'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'withpackage_json')
                 }
             }
         };
@@ -242,8 +237,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'withsubdirectory'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'withsubdirectory')
                 }
             }
         };
@@ -256,8 +250,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'withsubdirectory_package_json'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'withsubdirectory_package_json')
                 }
             }
         };
@@ -270,8 +263,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'config_in_www'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'config_in_www')
                 }
             }
         };
@@ -284,8 +276,7 @@ describe('create end-to-end', function () {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'config_in_www', 'www'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'config_in_www', 'www')
                 }
             }
         };
@@ -352,7 +343,6 @@ describe('create end-to-end', function () {
                     www: {
                         template: true,
                         url: path.join(__dirname, 'templates', 'config_in_www', 'www'),
-                        version: '',
                         link: true
                     }
                 }
@@ -401,7 +391,6 @@ describe('create end-to-end', function () {
                     www: {
                         template: true,
                         url: path.join(__dirname, 'templates', 'withsubdirectory_package_json'),
-                        version: '',
                         link: true
                     }
                 }
@@ -440,7 +429,6 @@ describe('create end-to-end', function () {
                     www: {
                         template: true,
                         url: path.join(__dirname, 'templates', 'noconfig'),
-                        version: '',
                         link: true
                     }
                 }
