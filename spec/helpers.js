@@ -29,7 +29,7 @@ const CordovaLogger = require('cordova-common').CordovaLogger;
 CordovaLogger.get().setLevel(CordovaLogger.ERROR);
 
 // Temporary directory to use for all tests
-const tmpDir = path.join(os.tmpdir(), 'e2e-test', 'create_test');
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cordova-create-tests-'));
 
 // Returns a version of create with its local scope rewired
 const create = rewire('..');
