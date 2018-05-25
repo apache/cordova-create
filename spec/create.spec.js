@@ -17,105 +17,45 @@
     under the License.
 */
 
-var helpers = require('./helpers');
-var path = require('path');
-var shell = require('shelljs');
-var events = require('cordova-common').events;
-var ConfigParser = require('cordova-common').ConfigParser;
-var create = require('../index');
 var fs = require('fs');
-var semver = require('semver');
-var tmpDir = helpers.tmpDir('create_test');
+var path = require('path');
+
+var shell = require('shelljs');
+var requireFresh = require('import-fresh');
+
+var create = require('..');
+var events = require('cordova-common').events;
+var CordovaError = require('cordova-common').CordovaError;
+var ConfigParser = require('cordova-common').ConfigParser;
+const {tmpDir, createWith, createWithMockFetch, expectRejection} = require('./helpers');
+
 var appName = 'TestBase';
 var appId = 'org.testing';
 var project = path.join(tmpDir, appName);
 
-// Global configuration paths
-var global_config_path = process.env.CORDOVA_HOME;
-if (!global_config_path) {
-    var HOME = process.env[(process.platform.slice(0, 3) === 'win') ? 'USERPROFILE' : 'HOME'];
-    global_config_path = path.join(HOME, '.cordova');
-}
-
-var configSubDirPkgJson = {
-    lib: {
-        www: {
-            template: true,
-            url: path.join(__dirname, 'templates', 'withsubdirectory_package_json'),
-            version: ''
-        }
-    }
-};
-
-var configConfigInWww = {
-    lib: {
-        www: {
-            template: true,
-            url: path.join(__dirname, 'templates', 'config_in_www'),
-            version: ''
-        }
-    }
-};
-
-var configGit = {
-    lib: {
-        www: {
-            url: 'https://github.com/apache/cordova-app-hello-world',
-            template: true,
-            version: 'not_versioned'
-        }
-    }
-};
-
-var configNPMold = {
-    lib: {
-        www: {
-            template: true,
-            url: 'phonegap-template-vue-f7-tabs@1.0.0',
-            version: ''
-        }
-    }
-};
-
-var configNPM = {
-    lib: {
-        www: {
-            template: true,
-            url: 'phonegap-template-vue-f7-tabs',
-            version: ''
-        }
-    }
-};
+// Setup and teardown test dirs
+beforeEach(function () {
+    shell.rm('-rf', project);
+    shell.mkdir('-p', tmpDir);
+});
+afterEach(function () {
+    process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
+    shell.rm('-rf', tmpDir);
+});
 
 describe('cordova create checks for valid-identifier', function () {
-    it('should reject reserved words from start of id', function (done) {
-        create('projectPath', 'int.bob', 'appName', {}, events)
-            .fail(function (err) {
-                expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
-            })
-            .fin(done);
-    }, 60000);
+    const error = new CordovaError('is not a valid identifier');
 
-    it('should reject reserved words from end of id', function (done) {
-        create('projectPath', 'bob.class', 'appName', {}, events)
-            .fail(function (err) {
-                expect(err.message).toBe('App id contains a reserved word, or is not a valid identifier.');
-            })
-            .fin(done);
-    }, 60000);
+    it('should reject reserved words from start of id', function () {
+        return expectRejection(create(project, 'int.bob', appName, {}, events), error);
+    });
+
+    it('should reject reserved words from end of id', function () {
+        return expectRejection(create(project, 'bob.class', appName, {}, events), error);
+    });
 });
 
 describe('create end-to-end', function () {
-
-    beforeEach(function () {
-        shell.rm('-rf', project);
-        shell.mkdir('-p', tmpDir);
-    });
-
-    afterEach(function () {
-        process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
-        shell.rm('-rf', tmpDir);
-    });
 
     function checkProject () {
         // Check if top level dirs exist.
@@ -184,9 +124,8 @@ describe('create end-to-end', function () {
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.version()).toEqual('1.0.0');
-        delete require.cache[require.resolve(path.join(project, 'package.json'))];
         // Check that we got package.json (the correct one)
-        var pkjson = require(path.join(project, 'package.json'));
+        var pkjson = requireFresh(path.join(project, 'package.json'));
         // Pkjson.displayName should equal config's name.
         expect(pkjson.displayName).toEqual(appName);
         expect(pkjson.valid).toEqual('true');
@@ -195,173 +134,174 @@ describe('create end-to-end', function () {
         expect(configXml.description()).toEqual('this is the correct config.xml');
     }
 
-    it('should successfully run without template and use default hello-world app', function (done) {
+    it('should successfully run without template and use default hello-world app', function () {
         // Create a real project with no template
         // use default cordova-app-hello-world app
         return create(project, appId, appName, {}, events)
             .then(checkProject)
             .then(function () {
-                delete require.cache[require.resolve(path.join(project, 'package.json'))];
-                var pkgJson = require(path.join(project, 'package.json'));
+                var pkgJson = requireFresh(path.join(project, 'package.json'));
                 // confirm default hello world app copies over package.json and it matched appId
                 expect(pkgJson.name).toEqual(appId);
-            }).fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
+            });
+    });
 
-    it('should successfully run with Git URL', function (done) {
-        // Create a real project with gitURL as template
-        return create(project, appId, appName, configGit, events)
-            .then(checkProject)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
+    it('should successfully run with Git URL', function () {
+        // Create a real project with git URL as template
+        var config = {
+            lib: {
+                www: {
+                    url: 'https://github.com/apache/cordova-app-hello-world',
+                    template: true
+                }
+            }
+        };
+        return createWithMockFetch(project, appId, appName, config, events)
+            .then(fetchSpy => {
+                expect(fetchSpy).toHaveBeenCalledTimes(1);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
-            .fin(done);
-    }, 60000);
+            .then(checkProject);
+    });
 
-    it('should successfully run with NPM package and not use old cache of template on second create', function (done) {
-        var templatePkgJsonPath = path.join(global_config_path, 'node_modules', 'phonegap-template-vue-f7-tabs', 'package.json');
+    it('should successfully run with NPM package', function () {
         // Create a real project with npm module as template
-        // tests cache clearing of npm template
-        // uses phonegap-template-vue-f7-tabs
-        return create(project, appId, appName, configNPMold)
-            .then(checkProject)
-            .then(function () {
-                shell.rm('-rf', project);
-                delete require.cache[require.resolve(templatePkgJsonPath)];
-                var pkgJson = require(templatePkgJsonPath);
-                expect(pkgJson.version).toBe('1.0.0');
-                return create(project, appId, appName, configNPM);
-            }).then(function () {
-                delete require.cache[require.resolve(templatePkgJsonPath)];
-                var pkgJson = require(templatePkgJsonPath);
-                expect(semver.gt(pkgJson.version, '1.0.0')).toBeTruthy();
-            }).fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
-
-    it('should successfully run with template not having a package.json at toplevel', function (done) {
-        // Call cordova create with no args, should return help.
         var config = {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'nopackage_json'),
-                    version: ''
+                    url: 'phonegap-template-vue-f7-tabs@1'
                 }
             }
         };
-        // Create a real project
+        return createWithMockFetch(project, appId, appName, config, events)
+            .then(fetchSpy => {
+                expect(fetchSpy).toHaveBeenCalledTimes(1);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
+            })
+            .then(checkProject);
+    });
+
+    it('should successfully run with NPM package and explicitly fetch latest if no version is given', function () {
+        // Create a real project with npm module as template
+        // TODO fetch should be responsible for the cache busting part of this test
+        var config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: 'phonegap-template-vue-f7-tabs'
+                }
+            }
+        };
+        return createWithMockFetch(project, appId, appName, config, events)
+            .then(fetchSpy => {
+                expect(fetchSpy).toHaveBeenCalledTimes(1);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url + '@latest');
+            })
+            .then(checkProject);
+    });
+
+    it('should successfully run with template not having a package.json at toplevel', function () {
+        var config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: path.join(__dirname, 'templates', 'nopackage_json')
+                }
+            }
+        };
         return create(project, appId, appName, config, events)
             .then(checkProject)
             .then(function () {
                 // Check that we got the right config.xml
                 var configXml = new ConfigParser(path.join(project, 'config.xml'));
                 expect(configXml.description()).toEqual('this is the very correct config.xml');
-            })
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
+            });
+    });
 
-    it('should successfully run with template having package.json and no sub directory', function (done) {
-        // Call cordova create with no args, should return help.
+    it('should successfully run with template having package.json and no sub directory', function () {
         var config = {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'withpackage_json'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'withpackage_json')
                 }
             }
         };
-        // Create a real project
         return create(project, appId, appName, config, events)
-            .then(checkProject)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
+            .then(checkProject);
+    });
 
-    it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function (done) {
-        // Call cordova create with no args, should return help.
+    it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
         var config = {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'withsubdirectory'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'withsubdirectory')
                 }
             }
         };
-
-        // Create a real project
         return create(project, appId, appName, config, events)
-            .then(checkProject)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
+            .then(checkProject);
+    });
 
-    it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function (done) {
-        // Call cordova create with no args, should return help.
-        var config = configSubDirPkgJson;
-        return create(project, appId, appName, config, events)
-            .then(checkSubDir)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
-
-    it('should successfully run config.xml in the www folder and move it outside', function (done) {
-        // Call cordova create with no args, should return help.
-        var config = configConfigInWww;
-        // Create a real project
-        return create(project, appId, appName, config, events)
-            .then(checkConfigXml)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
-
-    it('should successfully run with www folder as the template', function (done) {
+    it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
         var config = {
             lib: {
                 www: {
                     template: true,
-                    url: path.join(__dirname, 'templates', 'config_in_www', 'www'),
-                    version: ''
+                    url: path.join(__dirname, 'templates', 'withsubdirectory_package_json')
                 }
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkConfigXml)
-            .fail(function (err) {
-                console.log(err && err.stack);
-                expect(err).toBeUndefined();
-            })
-            .fin(done);
-    }, 60000);
+            .then(checkSubDir);
+    });
+
+    it('should successfully run config.xml in the www folder and move it outside', function () {
+        var config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: path.join(__dirname, 'templates', 'config_in_www')
+                }
+            }
+        };
+        return create(project, appId, appName, config, events)
+            .then(checkConfigXml);
+    });
+
+    it('should successfully run with www folder as the template', function () {
+        var config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: path.join(__dirname, 'templates', 'config_in_www', 'www')
+                }
+            }
+        };
+        return create(project, appId, appName, config, events)
+            .then(checkConfigXml);
+    });
+
+    it('should successfully run with existing, empty destination', function () {
+        shell.mkdir('-p', project);
+        return create(project, appId, appName, {}, events)
+            .then(checkProject);
+    });
 
     describe('when --link-to is provided', function () {
-        it('when passed www folder should not move www/config.xml, only copy and update', function (done) {
+        function allowSymlinkErrorOnWindows (err) {
+            const onWindows = process.platform.slice(0, 3) === 'win';
+            const isSymlinkError = err && String(err.message).startsWith('Symlinks on Windows');
+            if (onWindows && isSymlinkError) {
+                pending(err.message);
+            } else {
+                throw err;
+            }
+        }
+
+        it('when passed www folder should not move www/config.xml, only copy and update', function () {
             function checkSymWWW () {
                 // Check if top level dirs exist.
                 var dirs = ['hooks', 'platforms', 'plugins', 'www'];
@@ -403,28 +343,16 @@ describe('create end-to-end', function () {
                     www: {
                         template: true,
                         url: path.join(__dirname, 'templates', 'config_in_www', 'www'),
-                        version: '',
                         link: true
                     }
                 }
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymWWW)
-                .fail(function (err) {
-                    if (process.platform.slice(0, 3) === 'win') {
-                        // Allow symlink error if not in admin mode
-                        expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
-                    } else {
-                        if (err) {
-                            console.log(err.stack);
-                        }
-                        expect(err).toBeUndefined();
-                    }
-                })
-                .fin(done);
-        }, 60000);
+                .catch(allowSymlinkErrorOnWindows);
+        });
 
-        it('with subdirectory should not update symlinked project/config.xml', function (done) {
+        it('with subdirectory should not update symlinked project/config.xml', function () {
             function checkSymSubDir () {
                 // Check if top level dirs exist.
                 var dirs = ['hooks', 'platforms', 'plugins', 'www'];
@@ -452,9 +380,8 @@ describe('create end-to-end', function () {
                 // Check that we got the right config.xml
                 expect(configXml.description()).toEqual('this is the correct config.xml');
 
-                delete require.cache[require.resolve(path.join(project, 'package.json'))];
                 // Check that we got package.json (the correct one) and it was changed
-                var pkjson = require(path.join(project, 'package.json'));
+                var pkjson = requireFresh(path.join(project, 'package.json'));
                 // Pkjson.name should equal config's id.
                 expect(pkjson.name).toEqual(appId.toLowerCase());
                 expect(pkjson.valid).toEqual('true');
@@ -464,28 +391,16 @@ describe('create end-to-end', function () {
                     www: {
                         template: true,
                         url: path.join(__dirname, 'templates', 'withsubdirectory_package_json'),
-                        version: '',
                         link: true
                     }
                 }
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymSubDir)
-                .fail(function (err) {
-                    if (process.platform.slice(0, 3) === 'win') {
-                        // Allow symlink error if not in admin mode
-                        expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
-                    } else {
-                        if (err) {
-                            console.log(err.stack);
-                        }
-                        expect(err).toBeUndefined();
-                    }
-                })
-                .fin(done);
-        }, 60000);
+                .catch(allowSymlinkErrorOnWindows);
+        });
 
-        it('with no config should create one and update it', function (done) {
+        it('with no config should create one and update it', function () {
             function checkSymNoConfig () {
                 // Check if top level dirs exist.
                 var dirs = ['hooks', 'platforms', 'plugins', 'www'];
@@ -514,26 +429,78 @@ describe('create end-to-end', function () {
                     www: {
                         template: true,
                         url: path.join(__dirname, 'templates', 'noconfig'),
-                        version: '',
                         link: true
                     }
                 }
             };
             return create(project, appId, appName, config, events)
                 .then(checkSymNoConfig)
-                .fail(function (err) {
-                    if (process.platform.slice(0, 3) === 'win') {
-                        // Allow symlink error if not in admin mode
-                        expect(err.message).toBe('Symlinks on Windows require Administrator privileges');
-                    } else {
-                        if (err) {
-                            console.log(err.stack);
-                        }
-                        expect(err).toBeUndefined();
-                    }
-                })
-                .fin(done);
-        }, 60000);
+                .catch(allowSymlinkErrorOnWindows);
+        });
 
+    });
+});
+
+describe('when shit happens', function () {
+    it('should fail when dir is missing', function () {
+        return expectRejection(
+            create(null, appId, appName, {}, events),
+            new CordovaError('Directory not specified')
+        );
+    });
+
+    it('should fail when dir already exists', function () {
+        return expectRejection(
+            create(__dirname, appId, appName, {}, events),
+            new CordovaError('Path already exists and is not empty')
+        );
+    });
+
+    it('should fail when destination is inside template', function () {
+        const config = {
+            lib: {
+                www: {
+                    url: path.join(tmpDir, 'template')
+                }
+            }
+        };
+        const destination = path.join(config.lib.www.url, 'destination');
+        return expectRejection(
+            create(destination, appId, appName, config, events),
+            new CordovaError('inside the template')
+        );
+    });
+
+    it('should fail when fetch fails', function () {
+        const config = {
+            lib: {
+                www: {
+                    template: true,
+                    url: 'http://localhost:123456789/cordova-create'
+                }
+            }
+        };
+        const fetchError = new Error('Fetch fail');
+        const failingFetch = jasmine.createSpy('failingFetch')
+            .and.callFake(() => Promise.reject(fetchError));
+        return expectRejection(
+            createWith({fetch: failingFetch})(project, appId, appName, config),
+            fetchError
+        );
+
+    });
+
+    it('should fail when template does not exist', function () {
+        const config = {
+            lib: {
+                www: {
+                    url: path.join(__dirname, 'doesnotexist')
+                }
+            }
+        };
+        return expectRejection(
+            create(project, appId, appName, config, events),
+            new CordovaError('Could not find directory')
+        );
     });
 });

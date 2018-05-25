@@ -17,24 +17,27 @@
     under the License.
 */
 
-var path = require('path');
 var fs = require('fs');
+var os = require('os');
+var path = require('path');
+
+var Promise = require('q');
+var isUrl = require('is-url');
 var shell = require('shelljs');
+var requireFresh = require('import-fresh');
+var validateIdentifier = require('valid-identifier');
+
+var fetch = require('cordova-fetch');
 var events = require('cordova-common').events;
-var Q = require('q');
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
-var fetch = require('cordova-fetch');
-var url = require('url');
-var validateIdentifier = require('valid-identifier');
 var CordovaLogger = require('cordova-common').CordovaLogger.get();
 
+const DEFAULT_VERSION = '1.0.0';
+
 // Global configuration paths
-var global_config_path = process.env.CORDOVA_HOME;
-if (!global_config_path) {
-    var HOME = process.env[(process.platform.slice(0, 3) === 'win') ? 'USERPROFILE' : 'HOME'];
-    global_config_path = path.join(HOME, '.cordova');
-}
+var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
+
 /**
  * Sets up to forward events to another instance, or log console.
  * This will make the create internal events visible outside
@@ -64,7 +67,7 @@ function setupEvents (externalEventEmitter) {
  **/
 // Returns a promise.
 module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
-    return Q.fcall(function () {
+    return Promise.resolve().then(function () {
         events = setupEvents(extEvents);
         events.emit('verbose', 'Using detached cordova-create');
 
@@ -129,19 +132,9 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
         cfg.lib.www.url = cfg.lib.www.url || cfg.lib.www.uri;
 
         if (!cfg.lib.www.url) {
-            try {
-                cfg.lib.www.url = require.resolve('cordova-app-hello-world');
-                cfg.lib.www.template = true;
-            } catch (e) {
-                // Falling back on npm@2 path hierarchy
-                // TODO: Remove fallback after cordova-app-hello-world release
-                cfg.lib.www.url = path.join(__dirname, '..', '..', 'node_modules', 'cordova-app-hello-world');
-            }
+            cfg.lib.www.url = require.resolve('cordova-app-hello-world');
+            cfg.lib.www.template = true;
         }
-
-        // TODO (kamrik): extend lazy_load for retrieval without caching to allow net urls for --src.
-        cfg.lib.www.version = cfg.lib.www.version || 'not_versioned';
-        cfg.lib.www.id = cfg.lib.www.id || 'dummy_id';
 
         // Make sure that the source www/ is not a direct ancestor of the
         // target www/, or else we will recursively copy forever. To do this,
@@ -163,36 +156,16 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             // Finally, Ready to start!
             events.emit('log', 'Creating a new cordova project.');
 
-            // Strip link and url from cfg to avoid them being persisted to disk via .cordova/config.json.
-            // TODO: apparently underscore has no deep clone.  Replace with lodash or something. For now, abuse JSON.
-            var cfgToPersistToDisk = JSON.parse(JSON.stringify(cfg));
-
-            delete cfgToPersistToDisk.lib.www;
-            if (Object.keys(cfgToPersistToDisk.lib).length === 0) {
-                delete cfgToPersistToDisk.lib;
-            }
-
-            // Update cached version of config.json
-            writeToConfigJson(dir, cfgToPersistToDisk, false);
-        })
-        .then(function () {
-            var isGit;
-            var isNPM;
-            var options;
-
             // If symlink, don't fetch
             if (cfg.lib.www.link) {
-                events.emit('verbose', 'Symlinking assets.');
-                return Q(cfg.lib.www.url);
+                return cfg.lib.www.url;
             }
 
-            events.emit('verbose', 'Copying assets."');
-            isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
-            isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url))) && !isGit;
+            var isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
+            var isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url))) && !isGit;
             // Always use cordova fetch to obtain the npm or git template
             if (isGit || isNPM) {
                 // Saved to .Cordova folder (ToDo: Delete installed template after using)
-                // ToDo: @carynbear properly label errors from fetch as such
                 var tempDest = global_config_path;
                 var target = cfg.lib.www.url;
                 // add latest to npm module if no version is specified
@@ -202,30 +175,25 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 }
                 events.emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, tempDest, {})
-                    .fail(function (err) {
+                    .catch(function (err) {
                         events.emit('error', '\x1B[1m \x1B[31m Error from Cordova Fetch: ' + err.message);
                         events.emit('error', 'The template you are trying to use is invalid.' +
                         ' Make sure you follow the template guide found here https://cordova.apache.org/docs/en/latest/guide/cli/template.html.' +
                         ' Templates now require a package.json.');
-                        if (options.verbose) {
-                            console.trace();
-                        }
                         throw err;
                     });
             // If assets are not online, resolve as a relative path on local computer
             } else {
-                cfg.lib.www.url = path.resolve(cfg.lib.www.url);
-                return Q(cfg.lib.www.url);
+                return path.resolve(cfg.lib.www.url);
             }
-        }).then(function (input_directory) {
+        })
+        .then(function (input_directory) {
             var import_from_path = input_directory;
 
             // handle when input wants to specify sub-directory (specified in index.js as "dirname" export);
             var isSubDir = false;
             try {
-                // Delete cached require incase one exists
-                delete require.cache[require.resolve(input_directory)];
-                var templatePkg = require(input_directory);
+                var templatePkg = requireFresh(input_directory);
                 if (templatePkg && templatePkg.dirname) {
                     import_from_path = templatePkg.dirname;
                     isSubDir = true;
@@ -240,37 +208,31 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                     import_from_path);
             }
 
-            var paths = {};
-
-            // get stock config.xml, used if template does not contain config.xml
-            paths.configXml = path.join(require('cordova-app-hello-world').dirname, 'config.xml');
-
-            // get stock www; used if template does not contain www
-            paths.www = path.join(require('cordova-app-hello-world').dirname, 'www');
-
-            // get stock hooks; used if template does not contain hooks
-            paths.hooks = path.join(require('cordova-app-hello-world').dirname, 'hooks');
-
-            // ToDo: get stock package.json if template does not contain package.json;
             var dirAlreadyExisted = fs.existsSync(dir);
             if (!dirAlreadyExisted) {
                 fs.mkdirSync(dir);
             }
 
             try {
-
                 // Copy files from template to project
-                if (cfg.lib.www.template) { copyTemplateFiles(import_from_path, dir, isSubDir); }
+                if (cfg.lib.www.template) {
+                    events.emit('verbose', 'Copying assets.');
+                    copyTemplateFiles(import_from_path, dir, isSubDir);
+                }
 
                 // If --link, link merges, hooks, www, and config.xml (and/or copy to root)
-                if (cfg.lib.www.link) { linkFromTemplate(import_from_path, dir); }
+                if (cfg.lib.www.link) {
+                    events.emit('verbose', 'Symlinking assets.');
+                    linkFromTemplate(import_from_path, dir);
+                }
 
                 // If following were not copied/linked from template, copy from stock app hello world
-                copyIfNotExists(paths.www, path.join(dir, 'www'));
-                copyIfNotExists(paths.hooks, path.join(dir, 'hooks'));
+                // TODO: get stock package.json if template does not contain package.json;
+                copyIfNotExists(stockAssetPath('www'), path.join(dir, 'www'));
+                copyIfNotExists(stockAssetPath('hooks'), path.join(dir, 'hooks'));
                 var configXmlExists = projectConfig(dir); // moves config to root if in www
-                if (paths.configXml && !configXmlExists) {
-                    shell.cp(paths.configXml, path.join(dir, 'config.xml'));
+                if (!configXmlExists) {
+                    shell.cp(stockAssetPath('config.xml'), path.join(dir, 'config.xml'));
                 }
             } catch (e) {
                 if (!dirAlreadyExisted) {
@@ -285,8 +247,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             var pkgjsonPath = path.join(dir, 'package.json');
             // Update package.json name and version fields
             if (fs.existsSync(pkgjsonPath)) {
-                delete require.cache[require.resolve(pkgjsonPath)];
-                var pkgjson = require(pkgjsonPath);
+                var pkgjson = requireFresh(pkgjsonPath);
 
                 // Pkjson.displayName should equal config's name.
                 if (cfg.name) {
@@ -295,28 +256,27 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 // Pkjson.name should equal config's id.
                 if (cfg.id) {
                     pkgjson.name = cfg.id.toLowerCase();
-                } else if (!cfg.id) {
+                } else {
                     // Use default name.
                     pkgjson.name = 'helloworld';
                 }
 
-                pkgjson.version = '1.0.0';
+                pkgjson.version = DEFAULT_VERSION;
                 fs.writeFileSync(pkgjsonPath, JSON.stringify(pkgjson, null, 4), 'utf8');
             }
 
             // Create basic project structure.
-            if (!fs.existsSync(path.join(dir, 'platforms'))) { shell.mkdir(path.join(dir, 'platforms')); }
-
-            if (!fs.existsSync(path.join(dir, 'plugins'))) { shell.mkdir(path.join(dir, 'plugins')); }
+            shell.mkdir('-p', path.join(dir, 'platforms'));
+            shell.mkdir('-p', path.join(dir, 'plugins'));
 
             var configPath = path.join(dir, 'config.xml');
             // only update config.xml if not a symlink
             if (!fs.lstatSync(configPath).isSymbolicLink()) {
-                // Write out id and name to config.xml; set version to 1.0.0 (to match package.json default version)
+                // Write out id, name and default version to config.xml
                 var conf = new ConfigParser(configPath);
                 if (cfg.id) conf.setPackageName(cfg.id);
                 if (cfg.name) conf.setName(cfg.name);
-                conf.setVersion('1.0.0');
+                conf.setVersion(DEFAULT_VERSION);
                 conf.write();
             }
         });
@@ -352,8 +312,7 @@ function copyTemplateFiles (templateDir, projectDir, isSubDir) {
         copyPath = path.resolve(templateDir);
         shell.cp('-R', copyPath, projectDir);
     } else {
-        var templateFiles; // Current file
-        templateFiles = fs.readdirSync(templateDir);
+        var templateFiles = fs.readdirSync(templateDir);
         // Remove directories, and files that are unwanted
         if (!isSubDir) {
             var excludes = ['package.json', 'RELEASENOTES.md', '.git', 'NOTICE', 'LICENSE', 'COPYRIGHT', '.npmignore'];
@@ -367,15 +326,6 @@ function copyTemplateFiles (templateDir, projectDir, isSubDir) {
             shell.cp('-R', copyPath, projectDir);
         }
     }
-}
-
-/**
- * @param  {String} value
- * @return {Boolean} is the input value a url?
- */
-function isUrl (value) {
-    var u = value && url.parse(value);
-    return !!(u && u.protocol && u.protocol.length > 2); // Account for windows c:/ paths
 }
 
 /**
@@ -411,33 +361,6 @@ function dotCordovaConfig (project_root) {
         data = fs.readFileSync(configPath, 'utf-8');
     }
     return JSON.parse(data);
-}
-
-/**
- * Write opts to .cordova/config.json
- *
- * @param  {String} project directory
- * @param  {Object} opts containing the additions to config.json
- * @param  {Boolean} autopersist option
- * @return {JSON Data}
- */
-function writeToConfigJson (project_root, opts, autoPersist) {
-    var json = dotCordovaConfig(project_root);
-    for (var p in opts) {
-        json[p] = opts[p];
-    }
-    if (autoPersist) {
-        var configPath = path.join(project_root, '.cordova', 'config.json');
-        var contents = JSON.stringify(json, null, 4);
-        // Don't write the file for an empty config.
-        if (contents !== '{}' || fs.existsSync(configPath)) {
-            shell.mkdir('-p', path.join(project_root, '.cordova'));
-            fs.writeFileSync(configPath, contents, 'utf-8');
-        }
-        return json;
-    } else {
-        return json;
-    }
 }
 
 /**
@@ -482,4 +405,8 @@ function linkFromTemplate (templateDir, projectDir) {
     if (!fs.existsSync(copyDst) && fs.existsSync(copySrc)) {
         shell.cp(copySrc, projectDir);
     }
+}
+
+function stockAssetPath (p) {
+    return path.join(require('cordova-app-hello-world').dirname, p);
 }

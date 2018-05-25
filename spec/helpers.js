@@ -17,133 +17,61 @@
     under the License.
 */
 
-var path = require('path'),
-    fs = require('fs'),
-    shell = require('shelljs'),
-    os = require('os'),
-    ConfigParser = require('cordova-common').ConfigParser;
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
-// Just use Android everywhere; we're mocking out any calls to the `android` binary.
-module.exports.testPlatform = 'android';
+const rewire = require('rewire');
+const shell = require('shelljs');
 
-function getConfigPath (dir) {
-    // if path ends with 'config.xml', return it
-    if (dir.indexOf('config.xml') == dir.length - 10) {
-        return dir;
-    }
-    // otherwise, add 'config.xml' to the end of it
-    return path.join(dir, 'config.xml');
+// Disable regular console output during tests
+const CordovaLogger = require('cordova-common').CordovaLogger;
+CordovaLogger.get().setLevel(CordovaLogger.ERROR);
+
+// Temporary directory to use for all tests
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cordova-create-tests-'));
+
+// Returns a version of create with its local scope rewired
+const create = rewire('..');
+function createWith (rewiring) {
+    return (...args) => create.__with__(rewiring)(() => create(...args));
 }
 
-module.exports.tmpDir = function (subdir) {
-    var dir = path.join(os.tmpdir(), 'e2e-test');
-    if (subdir) {
-        dir = path.join(dir, subdir);
-    }
-    if (fs.existsSync(dir)) {
-        shell.rm('-rf', dir);
-    }
-    shell.mkdir('-p', dir);
-    return dir;
-};
+// Calls create with mocked fetch to not depend on the outside world
+function createWithMockFetch (dir, id, name, cfg, events) {
+    const mockFetchDest = path.join(tmpDir, 'mockFetchDest');
+    const templateDir = path.dirname(require.resolve('cordova-app-hello-world'));
+    const fetchSpy = jasmine.createSpy('fetchSpy')
+        .and.callFake(() => Promise.resolve(mockFetchDest));
 
-// Returns the platform that should be used for testing on this host platform.
-/*
-var host = os.platform();
-if (host.match(/win/)) {
-    module.exports.testPlatform = 'wp8';
-} else if (host.match(/darwin/)) {
-    module.exports.testPlatform = 'ios';
-} else {
-    module.exports.testPlatform = 'android';
+    shell.cp('-R', templateDir, mockFetchDest);
+    return createWith({fetch: fetchSpy})(dir, id, name, cfg, events)
+        .then(() => fetchSpy);
 }
-*/
 
-module.exports.setEngineSpec = function (appPath, engine, spec) {
-    appPath = getConfigPath(appPath);
-    var parser = new ConfigParser(appPath);
+// Expect promise to get rejected with a reason matching expectedReason
+function expectRejection (promise, expectedReason) {
+    return promise.then(
+        () => fail('Expected promise to be rejected'),
+        reason => {
+            if (expectedReason instanceof Error) {
+                expect(reason instanceof expectedReason.constructor).toBeTruthy();
+                expect(reason.message).toContain(expectedReason.message);
+            } else if (typeof expectedReason === 'function') {
+                expect(expectedReason(reason)).toBeTruthy();
+            } else if (expectedReason !== undefined) {
+                expect(reason).toBe(expectedReason);
+            } else {
+                expect().nothing();
+            }
+        });
+}
 
-    parser.removeEngine(engine);
-    parser.addEngine(engine, spec);
-    parser.write();
-};
-
-module.exports.getEngineSpec = function (appPath, engine) {
-    appPath = getConfigPath(appPath);
-    var parser = new ConfigParser(appPath),
-        engines = parser.getEngines();
-
-    for (var i = 0; i < engines.length; i++) {
-        if (engines[i].name === module.exports.testPlatform) {
-            return engines[i].spec;
-        }
-    }
-    return null;
-};
-
-module.exports.removeEngine = function (appPath, engine) {
-    appPath = getConfigPath(appPath);
-    var parser = new ConfigParser(appPath);
-
-    parser.removeEngine(module.exports.testPlatform);
-    parser.write();
-};
-
-module.exports.setPluginSpec = function (appPath, plugin, spec) {
-    appPath = getConfigPath(appPath);
-    var parser = new ConfigParser(appPath),
-        p = parser.getPlugin(plugin),
-        variables = [];
-
-    if (p) {
-        parser.removePlugin(p.name);
-        if (p.variables.length && p.variables.length > 0) {
-            variables = p.variables;
-        }
-    }
-
-    parser.addPlugin({ 'name': plugin, 'spec': spec }, variables);
-    parser.write();
-};
-
-module.exports.getPluginSpec = function (appPath, plugin) {
-    appPath = getConfigPath(appPath);
-    var parser = new ConfigParser(appPath),
-        p = parser.getPlugin(plugin);
-
-    if (p) {
-        return p.spec;
-    }
-    return null;
-};
-
-module.exports.getPluginVariable = function (appPath, plugin, variable) {
-    appPath = getConfigPath(appPath);
-    var parser = new ConfigParser(appPath),
-        p = parser.getPlugin(plugin);
-
-    if (p && p.variables) {
-        return p.variables[variable];
-    }
-    return null;
-};
-
-module.exports.removePlugin = function (appPath, plugin) {
-    appPath = getConfigPath(appPath);
-    var parser = new ConfigParser(appPath);
-
-    parser.removePlugin(plugin);
-    parser.write();
-};
-
-module.exports.getConfigContent = function (appPath) {
-    var configFile = path.join(appPath, 'config.xml');
-    return fs.readFileSync(configFile, 'utf-8');
-};
-
-module.exports.writeConfigContent = function (appPath, configContent) {
-    var configFile = path.join(appPath, 'config.xml');
-    fs.writeFileSync(configFile, configContent, 'utf-8');
+module.exports = {
+    tmpDir,
+    createWith,
+    createWithMockFetch,
+    expectRejection
 };
 
 // Add the toExist matcher.
