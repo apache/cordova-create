@@ -17,10 +17,10 @@
     under the License.
 */
 
-var fs = require('fs');
+const fs = require('fs-extra');
+
 var path = require('path');
 
-var shell = require('shelljs');
 var requireFresh = require('import-fresh');
 
 var create = require('..');
@@ -35,12 +35,11 @@ var project = path.join(tmpDir, appName);
 
 // Setup and teardown test dirs
 beforeEach(function () {
-    shell.rm('-rf', project);
-    shell.mkdir('-p', tmpDir);
+    fs.emptyDirSync(tmpDir);
 });
-afterEach(function () {
+afterAll(function () {
     process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
-    shell.rm('-rf', tmpDir);
+    fs.removeSync(tmpDir);
 });
 
 describe('cordova create checks for valid-identifier', function () {
@@ -342,7 +341,7 @@ describe('create end-to-end', function () {
     });
 
     it('should successfully run with existing, empty destination', function () {
-        shell.mkdir('-p', project);
+        fs.ensureDirSync(project);
         return create(project, appId, appName, {}, events)
             .then(checkProjectArtifactsWithPackageFromTemplate);
     });
