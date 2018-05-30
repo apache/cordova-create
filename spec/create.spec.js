@@ -146,8 +146,8 @@ describe('create end-to-end', function () {
         // Check if package.json exists.
         expect(path.join(project, 'package.json')).toExist();
 
-        // [CB-12397] Check that .gitignore does not exist
-        expect(path.join(project, '.gitignore')).not.toExist();
+        // [CB-12397] Check that .gitignore exists
+        expect(path.join(project, '.gitignore')).toExist();
         // [CB-12397] Check that .npmignore exists
         expect(path.join(project, '.npmignore')).toExist();
 
@@ -164,8 +164,8 @@ describe('create end-to-end', function () {
         expect(path.join(project, 'www', 'js')).not.toExist();
         expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
 
-        // [CB-12397] Check that .gitignore does not exist
-        expect(path.join(project, '.gitignore')).not.toExist();
+        // [CB-12397] Check that .gitignore exists
+        expect(path.join(project, '.gitignore')).toExist();
         // [CB-12397] Check that .npmignore does not exist
         expect(path.join(project, '.npmignore')).not.toExist();
 

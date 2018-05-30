@@ -213,6 +213,17 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 fs.mkdirSync(dir);
             }
 
+            // CB-12397 add .gitignore for plugins & platforms
+            // to generated app
+            // (use stock .npmignore for ignore file)
+            // NOTE: This is a workaround solution for the existing
+            // npm .gitignore/.npmignore behavior discussed in:
+            // npm/npm#1862
+            // npm/npm#3763
+            // npm/npm#7252
+            const ignoreStockPath =
+                path.join(require('cordova-app-hello-world').dirname, '.npmignore');
+
             try {
                 // Copy files from template to project
                 if (cfg.lib.www.template) {
@@ -263,6 +274,16 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
 
                 pkgjson.version = DEFAULT_VERSION;
                 fs.writeFileSync(pkgjsonPath, JSON.stringify(pkgjson, null, 4), 'utf8');
+
+                // XXX TODO USE fs-extra function instead,
+                // XXX WAITING FOR apache/cordova-create#14 to be merged
+                // CB-12397 add .gitignore for plugins & platforms
+                // to generated app
+                // XXX GONE:
+                shell.cp(ignoreStockPath, path.join(dir, '.gitignore'));
+                /* ** XXX TODO:
+                fs.copySync(ignoreStockPath, path.join(dir, '.gitignore'));
+                // */
             }
 
             // Create basic project structure.
