@@ -133,12 +133,7 @@ describe('create end-to-end', function () {
         // Create a real project with no template
         // use default cordova-app-hello-world app
         return create(project, appId, appName, {}, events)
-            .then(checkProjectCreatedWithDefaultTemplate)
-            .then(function () {
-                var pkgJson = requireFresh(path.join(project, 'package.json'));
-                // confirm default hello world app copies over package.json and it matched appId
-                expect(pkgJson.name).toEqual(appId);
-            });
+            .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with Git URL', function () {
@@ -206,12 +201,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectCreatedWithFixtureTemplate)
-            .then(function () {
-                // Check that we got the right config.xml
-                var configXml = new ConfigParser(path.join(project, 'config.xml'));
-                expect(configXml.description()).toEqual('this is the very correct config.xml');
-            });
+            .then(checkProjectCreatedWithFixtureTemplate);
     });
 
     it('should successfully run with template having package.json and no sub directory', function () {
