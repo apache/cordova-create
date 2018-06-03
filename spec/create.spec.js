@@ -189,33 +189,7 @@ describe('create end-to-end', function () {
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
-    it('should successfully run with template not having a package.json at toplevel', function () {
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: path.join(__dirname, 'templates', 'nopackage_json')
-                }
-            }
-        };
-        return create(project, appId, appName, config, events)
-            .then(checkProjectCreatedWithFixtureTemplate);
-    });
-
-    it('should successfully run with template having package.json and no sub directory', function () {
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: path.join(__dirname, 'templates', 'withpackage_json')
-                }
-            }
-        };
-        return create(project, appId, appName, config, events)
-            .then(checkProjectCreatedWithFixtureTemplate);
-    });
-
-    it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
+    it('should successfully run with local template having no package.json in template dir', function () {
         var config = {
             lib: {
                 www: {
@@ -228,7 +202,7 @@ describe('create end-to-end', function () {
             .then(checkProjectCreatedWithFixtureTemplate);
     });
 
-    it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
+    it('should successfully run with local template having package.json in template dir', function () {
         var config = {
             lib: {
                 www: {
@@ -241,32 +215,6 @@ describe('create end-to-end', function () {
             .then(checkCommonArtifacts)
             .then(checkPackageJson)
             .then(checkNotDefaultTemplate);
-    });
-
-    it('should successfully run config.xml in the www folder and move it outside', function () {
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: path.join(__dirname, 'templates', 'config_in_www')
-                }
-            }
-        };
-        return create(project, appId, appName, config, events)
-            .then(checkProjectCreatedWithFixtureTemplate);
-    });
-
-    it('should successfully run with www folder as the template', function () {
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: path.join(__dirname, 'templates', 'config_in_www', 'www')
-                }
-            }
-        };
-        return create(project, appId, appName, config, events)
-            .then(checkProjectCreatedWithFixtureTemplate);
     });
 
     it('should successfully run with existing, empty destination', function () {
@@ -335,7 +283,7 @@ describe('when shit happens', function () {
         };
         return expectRejection(
             create(project, appId, appName, config, events),
-            new CordovaError('Could not find directory')
+            new CordovaError('not a valid template')
         );
     });
 });

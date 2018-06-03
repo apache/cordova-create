@@ -117,20 +117,13 @@ function cordovaCreate (dest, opts = {}) {
                 return path.resolve(opts.url);
             }
         })
-        .then(function (input_directory) {
-            var import_from_path = input_directory;
+        .then(function (templatePath) {
+            var import_from_path;
 
-            // handle when input wants to specify sub-directory (specified in index.js as "dirname" export);
-            var isSubDir = false;
             try {
-                var templatePkg = requireFresh(input_directory);
-                if (templatePkg && templatePkg.dirname) {
-                    import_from_path = templatePkg.dirname;
-                    isSubDir = true;
-                }
+                import_from_path = requireFresh(templatePath).dirname;
             } catch (e) {
-                emit('verbose', 'index.js does not specify valid sub-directory: ' + input_directory);
-                isSubDir = false;
+                throw new CordovaError(templatePath + ' is not a valid template');
             }
 
             if (!fs.existsSync(import_from_path)) {
@@ -147,17 +140,14 @@ function cordovaCreate (dest, opts = {}) {
                 // Copy files from template to project
                 if (opts.template) {
                     emit('verbose', 'Copying assets.');
-                    copyTemplateFiles(import_from_path, dir, isSubDir);
+                    fs.copySync(import_from_path, dir);
                 }
 
                 // If following were not copied from template, copy from stock app hello world
                 // TODO: get stock package.json if template does not contain package.json;
                 copyIfNotExists(stockAssetPath('www'), path.join(dir, 'www'));
                 copyIfNotExists(stockAssetPath('hooks'), path.join(dir, 'hooks'));
-                var configXmlExists = projectConfig(dir); // moves config to root if in www
-                if (!configXmlExists) {
-                    fs.copySync(stockAssetPath('config.xml'), path.join(dir, 'config.xml'));
-                }
+                copyIfNotExists(stockAssetPath('config.xml'), path.join(dir, 'config.xml'));
             } catch (e) {
                 if (!dirAlreadyExisted) {
                     fs.removeSync(dir);
@@ -216,57 +206,6 @@ function copyIfNotExists (src, dst) {
     if (!fs.existsSync(dst) && src) {
         fs.copySync(src, dst);
     }
-}
-
-/**
- * Copies template files, and directories into a Cordova project directory.
- * If the template is a www folder, the www folder is simply copied
- * Otherwise if the template exists in a subdirectory everything is copied
- * Otherwise package.json, RELEASENOTES.md, .git, NOTICE, LICENSE, COPYRIGHT, and .npmignore are not copied over.
- * A template directory, and project directory must be passed.
- * templateDir - Template directory
- * projectDir - Project directory
- * isSubDir - boolean is true if template has subdirectory structure (see code around line 229)
- */
-function copyTemplateFiles (templateDir, projectDir, isSubDir) {
-    var copyPath;
-    // if template is a www dir
-    if (path.basename(templateDir) === 'www') {
-        copyPath = path.resolve(templateDir);
-        fs.copySync(copyPath, path.resolve(projectDir, 'www'));
-    } else {
-        var templateFiles = fs.readdirSync(templateDir);
-        // Remove directories, and files that are unwanted
-        if (!isSubDir) {
-            var excludes = ['package.json', 'RELEASENOTES.md', '.git', 'NOTICE', 'LICENSE', 'COPYRIGHT', '.npmignore'];
-            templateFiles = templateFiles.filter(function (value) {
-                return excludes.indexOf(value) < 0;
-            });
-        }
-        // Copy each template file after filter
-        templateFiles.forEach(f => {
-            copyPath = path.resolve(templateDir, f);
-            fs.copySync(copyPath, path.resolve(projectDir, f));
-        });
-    }
-}
-
-/**
- * Find config file in project directory or www directory
- * If file is in www directory, move it outside
- * @param  {String} project directory to be searched
- * @return {String or False} location of config file; if none exists, returns false
- */
-function projectConfig (projectDir) {
-    var rootPath = path.join(projectDir, 'config.xml');
-    var wwwPath = path.join(projectDir, 'www', 'config.xml');
-    if (fs.existsSync(rootPath)) {
-        return rootPath;
-    } else if (fs.existsSync(wwwPath)) {
-        fs.renameSync(wwwPath, rootPath);
-        return wwwPath;
-    }
-    return false;
 }
 
 function stockAssetPath (p) {
