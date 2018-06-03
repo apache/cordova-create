@@ -58,7 +58,7 @@ describe('cordova create checks for valid-identifier', function () {
 
 describe('create end-to-end', function () {
 
-    function checkProjectCommonArtifacts () {
+    function checkCommonArtifacts () {
         // Check if top level dirs exist.
         var dirs = ['hooks', 'platforms', 'plugins', 'www'];
         dirs.forEach(function (d) {
@@ -117,35 +117,23 @@ describe('create end-to-end', function () {
         expect(configXml.author()).not.toEqual('Apache Cordova Team');
     }
 
-    function checkProjectArtifactsWithConfigFromTemplate () {
-        checkProjectCommonArtifacts();
+    function checkProjectCreatedWithFixtureTemplate () {
+        checkCommonArtifacts();
         checkNoPackageJson();
         checkNotDefaultTemplate();
     }
 
-    function checkProjectArtifactsWithNoPackageFromTemplate () {
-        checkProjectCommonArtifacts();
-        checkNoPackageJson();
-        checkNotDefaultTemplate();
-    }
-
-    function checkProjectArtifactsWithPackageFromTemplate () {
-        checkProjectCommonArtifacts();
+    function checkProjectCreatedWithDefaultTemplate () {
+        checkCommonArtifacts();
         checkPackageJson();
         checkDefaultTemplate();
-    }
-
-    function checkProjectArtifactsWithPackageFromSubDir () {
-        checkProjectCommonArtifacts();
-        checkPackageJson();
-        checkNotDefaultTemplate();
     }
 
     it('should successfully run without template and use default hello-world app', function () {
         // Create a real project with no template
         // use default cordova-app-hello-world app
         return create(project, appId, appName, {}, events)
-            .then(checkProjectArtifactsWithPackageFromTemplate)
+            .then(checkProjectCreatedWithDefaultTemplate)
             .then(function () {
                 var pkgJson = requireFresh(path.join(project, 'package.json'));
                 // confirm default hello world app copies over package.json and it matched appId
@@ -168,7 +156,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
-            .then(checkProjectArtifactsWithPackageFromTemplate);
+            .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with NPM package', function () {
@@ -186,7 +174,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
-            .then(checkProjectArtifactsWithPackageFromTemplate);
+            .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with NPM package and explicitly fetch latest if no version is given', function () {
@@ -205,7 +193,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url + '@latest');
             })
-            .then(checkProjectArtifactsWithPackageFromTemplate);
+            .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with template not having a package.json at toplevel', function () {
@@ -218,7 +206,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectArtifactsWithNoPackageFromTemplate)
+            .then(checkProjectCreatedWithFixtureTemplate)
             .then(function () {
                 // Check that we got the right config.xml
                 var configXml = new ConfigParser(path.join(project, 'config.xml'));
@@ -236,7 +224,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectArtifactsWithNoPackageFromTemplate);
+            .then(checkProjectCreatedWithFixtureTemplate);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
@@ -249,7 +237,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectArtifactsWithNoPackageFromTemplate);
+            .then(checkProjectCreatedWithFixtureTemplate);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
@@ -262,7 +250,9 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectArtifactsWithPackageFromSubDir);
+            .then(checkCommonArtifacts)
+            .then(checkPackageJson)
+            .then(checkNotDefaultTemplate);
     });
 
     it('should successfully run config.xml in the www folder and move it outside', function () {
@@ -275,7 +265,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectArtifactsWithConfigFromTemplate);
+            .then(checkProjectCreatedWithFixtureTemplate);
     });
 
     it('should successfully run with www folder as the template', function () {
@@ -288,13 +278,13 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectArtifactsWithConfigFromTemplate);
+            .then(checkProjectCreatedWithFixtureTemplate);
     });
 
     it('should successfully run with existing, empty destination', function () {
         shell.mkdir('-p', project);
         return create(project, appId, appName, {}, events)
-            .then(checkProjectArtifactsWithPackageFromTemplate);
+            .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     describe('when --link-to is provided', function () {
