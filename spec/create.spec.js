@@ -29,10 +29,10 @@ var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
 const {tmpDir, createWith, createWithMockFetch, expectRejection} = require('./helpers');
 
-var appName = 'TestBase';
-var appId = 'org.testing';
-var appVersion = '1.0.0';
-var project = path.join(tmpDir, appName);
+const appName = 'TestBase';
+const appId = 'org.testing';
+const appVersion = '1.0.0';
+const project = path.join(tmpDir, appName);
 
 // Setup and teardown test dirs
 beforeEach(function () {
