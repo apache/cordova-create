@@ -59,7 +59,7 @@ describe('cordova create checks for valid-identifier', function () {
 describe('create end-to-end', function () {
 
     function checkCommonArtifacts () {
-        // Check if top level dirs exist.
+        // Check that top level dirs exist
         var dirs = ['hooks', 'platforms', 'plugins', 'www'];
         dirs.forEach(function (d) {
             expect(path.join(project, d)).toExist();
@@ -82,7 +82,7 @@ describe('create end-to-end', function () {
         // Check that config.xml does not exist inside of www
         expect(path.join(project, 'www', 'config.xml')).not.toExist();
 
-        // Check that config.xml was updated.
+        // Check that config.xml was updated correctly
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.name()).toEqual(appName);
