@@ -64,66 +64,43 @@ describe('create end-to-end', function () {
             expect(path.join(project, d)).toExist();
         });
 
+        // Check that README.md exists inside of hooks
         expect(path.join(project, 'hooks', 'README.md')).toExist();
 
-        // Check if www files exist.
+        // Check that index.html exists inside of www
         expect(path.join(project, 'www', 'index.html')).toExist();
+
+        // index.js and template subdir folder should not exist in top level
+        // (inner files should be copied to the project top level folder)
+        expect(path.join(project, 'index.js')).not.toExist();
+        expect(path.join(project, 'template')).not.toExist();
+
+        // Check that config.xml does not exist inside of www
+        expect(path.join(project, 'www', 'config.xml')).not.toExist();
 
         // Check that config.xml was updated.
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
+        expect(configXml.name()).toEqual(appName);
+        expect(configXml.version()).toEqual('1.0.0');
 
         // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
-        // expect(configXml.name()).toEqual('TestBase');
     }
 
     function checkConfigXml () {
-        // Check if top level dirs exist.
-        var dirs = ['hooks', 'platforms', 'plugins', 'www'];
-        dirs.forEach(function (d) {
-            expect(path.join(project, d)).toExist();
-        });
-        expect(path.join(project, 'hooks', 'README.md')).toExist();
-
-        // index.js and template subdir folder should not exist (inner files should be copied to the project folder)
-        expect(path.join(project, 'index.js')).not.toExist();
-        expect(path.join(project, 'template')).not.toExist();
-
-        // Check if www files exist.
-        expect(path.join(project, 'www', 'index.html')).toExist();
-        var configXml = new ConfigParser(path.join(project, 'config.xml'));
-        expect(configXml.packageName()).toEqual(appId);
-        expect(configXml.version()).toEqual('1.0.0');
-
-        // Check that config.xml does not exist inside of www
-        expect(path.join(project, 'www', 'config.xml')).not.toExist();
+        checkProject();
 
         // Check that we got no package.json
         expect(path.join(project, 'package.json')).not.toExist();
 
         // Check that we got the right config.xml from the template and not stock
+        const configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.description()).toEqual('this is the correct config.xml');
     }
 
     function checkSubDir () {
-        // Check if top level dirs exist.
-        var dirs = ['hooks', 'platforms', 'plugins', 'www'];
-        dirs.forEach(function (d) {
-            expect(path.join(project, d)).toExist();
-        });
-        expect(path.join(project, 'hooks', 'README.md')).toExist();
+        checkProject();
 
-        // index.js and template subdir folder should not exist (inner files should be copied to the project folder)
-        expect(path.join(project, 'index.js')).not.toExist();
-        expect(path.join(project, 'template')).not.toExist();
-
-        // Check if config files exist.
-        expect(path.join(project, 'www', 'index.html')).toExist();
-
-        // Check that config.xml was updated.
-        var configXml = new ConfigParser(path.join(project, 'config.xml'));
-        expect(configXml.packageName()).toEqual(appId);
-        expect(configXml.version()).toEqual('1.0.0');
         // Check that we got package.json (the correct one)
         var pkjson = requireFresh(path.join(project, 'package.json'));
         // Pkjson.displayName should equal config's name.
@@ -131,6 +108,7 @@ describe('create end-to-end', function () {
         expect(pkjson.valid).toEqual('true');
 
         // Check that we got the right config.xml
+        const configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.description()).toEqual('this is the correct config.xml');
     }
 
