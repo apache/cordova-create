@@ -17,10 +17,10 @@
     under the License.
 */
 
-var fs = require('fs');
+const fs = require('fs-extra');
+
 var path = require('path');
 
-var shell = require('shelljs');
 var requireFresh = require('import-fresh');
 
 var create = require('..');
@@ -35,12 +35,11 @@ var project = path.join(tmpDir, appName);
 
 // Setup and teardown test dirs
 beforeEach(function () {
-    shell.rm('-rf', project);
-    shell.mkdir('-p', tmpDir);
+    fs.emptyDirSync(tmpDir);
 });
-afterEach(function () {
+afterAll(function () {
     process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
-    shell.rm('-rf', tmpDir);
+    fs.removeSync(tmpDir);
 });
 
 describe('cordova create checks for valid-identifier', function () {
@@ -57,80 +56,130 @@ describe('cordova create checks for valid-identifier', function () {
 
 describe('create end-to-end', function () {
 
-    function checkProject () {
+    function checkProjectCommonArtifacts () {
         // Check if top level dirs exist.
         var dirs = ['hooks', 'platforms', 'plugins', 'www'];
         dirs.forEach(function (d) {
             expect(path.join(project, d)).toExist();
         });
 
+        // Check that README.md exists inside of hooks
         expect(path.join(project, 'hooks', 'README.md')).toExist();
 
-        // Check if www files exist.
+        // Check that index.html exists inside of www
         expect(path.join(project, 'www', 'index.html')).toExist();
+
+        // Check if config.xml exists.
+        expect(path.join(project, 'config.xml')).toExist();
+
+        // index.html, index.js and template subdir folder
+        // should not exist in top level
+        // (inner files should be copied to the project top level folder)
+        expect(path.join(project, 'index.html')).not.toExist();
+        expect(path.join(project, 'index.js')).not.toExist();
+        expect(path.join(project, 'template')).not.toExist();
+
+        // Check that .gitignore does not exist inside of www
+        expect(path.join(project, 'www', '.gitignore')).not.toExist();
+
+        // Check that .npmignore does not exist inside of www
+        expect(path.join(project, 'www', '.npmignore')).not.toExist();
+
+        // Check that config.xml does not exist inside of www
+        expect(path.join(project, 'www', 'config.xml')).not.toExist();
+
+        // Check that no package.json exists inside of www
+        expect(path.join(project, 'www', 'package.json')).not.toExist();
 
         // Check that config.xml was updated.
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
-
-        // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
-        // expect(configXml.name()).toEqual('TestBase');
+        expect(configXml.version()).toEqual('1.0.0');
+        // Check that we got the right config.xml from the fixture and not some place else.
+        expect(configXml.name()).toEqual('TestBase');
     }
 
-    function checkConfigXml () {
-        // Check if top level dirs exist.
-        var dirs = ['hooks', 'platforms', 'plugins', 'www'];
-        dirs.forEach(function (d) {
-            expect(path.join(project, d)).toExist();
-        });
-        expect(path.join(project, 'hooks', 'README.md')).toExist();
+    function checkProjectArtifactsWithConfigFromTemplate () {
+        checkProjectCommonArtifacts();
 
-        // index.js and template subdir folder should not exist (inner files should be copied to the project folder)
-        expect(path.join(project, 'index.js')).not.toExist();
-        expect(path.join(project, 'template')).not.toExist();
+        // Check that standard js artifact does not exist
+        expect(path.join(project, 'www', 'js')).not.toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
 
-        // Check if www files exist.
-        expect(path.join(project, 'www', 'index.html')).toExist();
-        var configXml = new ConfigParser(path.join(project, 'config.xml'));
-        expect(configXml.packageName()).toEqual(appId);
-        expect(configXml.version()).toEqual('1.0.0');
-
-        // Check that config.xml does not exist inside of www
-        expect(path.join(project, 'www', 'config.xml')).not.toExist();
+        // [CB-12397] Check that .gitignore does not exist
+        expect(path.join(project, '.gitignore')).not.toExist();
+        // [CB-12397] Check that .npmignore does not exist
+        expect(path.join(project, '.npmignore')).not.toExist();
 
         // Check that we got no package.json
         expect(path.join(project, 'package.json')).not.toExist();
 
         // Check that we got the right config.xml from the template and not stock
+        const configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.description()).toEqual('this is the correct config.xml');
     }
 
-    function checkSubDir () {
-        // Check if top level dirs exist.
-        var dirs = ['hooks', 'platforms', 'plugins', 'www'];
-        dirs.forEach(function (d) {
-            expect(path.join(project, d)).toExist();
-        });
-        expect(path.join(project, 'hooks', 'README.md')).toExist();
+    function checkProjectArtifactsWithNoPackageFromTemplate () {
+        checkProjectCommonArtifacts();
 
-        // index.js and template subdir folder should not exist (inner files should be copied to the project folder)
-        expect(path.join(project, 'index.js')).not.toExist();
-        expect(path.join(project, 'template')).not.toExist();
+        // Check that standard js artifact does not exist
+        expect(path.join(project, 'www', 'js')).not.toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
+
+        // [CB-12397] Check that .gitignore does not exist
+        expect(path.join(project, '.gitignore')).not.toExist();
+        // [CB-12397] Check that .npmignore does not exist
+        expect(path.join(project, '.npmignore')).not.toExist();
+
+        // Check that we got no package.json
+        expect(path.join(project, 'package.json')).not.toExist();
+    }
+
+    function checkProjectArtifactsWithPackageFromTemplate () {
+        checkProjectCommonArtifacts();
+
+        // Check that standard js artifact exists
+        expect(path.join(project, 'www', 'js')).toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).toExist();
+
+        // Check if package.json exists.
+        expect(path.join(project, 'package.json')).toExist();
+
+        // [CB-12397] Check that .gitignore does not exist
+        expect(path.join(project, '.gitignore')).not.toExist();
+        // [CB-12397] Check that .npmignore exists
+        expect(path.join(project, '.npmignore')).toExist();
+
+        // Check that we got package.json (the correct one)
+        var pkjson = requireFresh(path.join(project, 'package.json'));
+        // Pkjson.displayName should equal config's name.
+        expect(pkjson.displayName).toEqual('TestBase');
+    }
+
+    function checkProjectArtifactsWithPackageFromSubDir () {
+        checkProjectCommonArtifacts();
+
+        // Check that standard js artifact does not exist
+        expect(path.join(project, 'www', 'js')).not.toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
+
+        // [CB-12397] Check that .gitignore does not exist
+        expect(path.join(project, '.gitignore')).not.toExist();
+        // [CB-12397] Check that .npmignore does not exist
+        expect(path.join(project, '.npmignore')).not.toExist();
 
         // Check if config files exist.
         expect(path.join(project, 'www', 'index.html')).toExist();
 
-        // Check that config.xml was updated.
-        var configXml = new ConfigParser(path.join(project, 'config.xml'));
-        expect(configXml.packageName()).toEqual(appId);
-        expect(configXml.version()).toEqual('1.0.0');
         // Check that we got package.json (the correct one)
         var pkjson = requireFresh(path.join(project, 'package.json'));
+
         // Pkjson.displayName should equal config's name.
         expect(pkjson.displayName).toEqual(appName);
         expect(pkjson.valid).toEqual('true');
 
         // Check that we got the right config.xml
+        const configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.description()).toEqual('this is the correct config.xml');
     }
 
@@ -138,7 +187,7 @@ describe('create end-to-end', function () {
         // Create a real project with no template
         // use default cordova-app-hello-world app
         return create(project, appId, appName, {}, events)
-            .then(checkProject)
+            .then(checkProjectArtifactsWithPackageFromTemplate)
             .then(function () {
                 var pkgJson = requireFresh(path.join(project, 'package.json'));
                 // confirm default hello world app copies over package.json and it matched appId
@@ -161,7 +210,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     it('should successfully run with NPM package', function () {
@@ -179,7 +228,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     it('should successfully run with NPM package and explicitly fetch latest if no version is given', function () {
@@ -198,7 +247,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url + '@latest');
             })
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     it('should successfully run with template not having a package.json at toplevel', function () {
@@ -211,7 +260,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProject)
+            .then(checkProjectArtifactsWithNoPackageFromTemplate)
             .then(function () {
                 // Check that we got the right config.xml
                 var configXml = new ConfigParser(path.join(project, 'config.xml'));
@@ -229,7 +278,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProject);
+            .then(checkProjectArtifactsWithNoPackageFromTemplate);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
@@ -242,7 +291,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProject);
+            .then(checkProjectArtifactsWithNoPackageFromTemplate);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
@@ -255,7 +304,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkSubDir);
+            .then(checkProjectArtifactsWithPackageFromSubDir);
     });
 
     it('should successfully run config.xml in the www folder and move it outside', function () {
@@ -268,7 +317,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkConfigXml);
+            .then(checkProjectArtifactsWithConfigFromTemplate);
     });
 
     it('should successfully run with www folder as the template', function () {
@@ -281,13 +330,20 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkConfigXml);
+            .then(checkProjectArtifactsWithConfigFromTemplate)
+            .then(() => {
+                // Additional check that we have the fixture www,
+                // not one from stock the app
+                expect(path.join(project, 'www', 'fixture-marker-page.html')).toExist();
+                expect(path.join(project, 'www', 'subdir')).toExist();
+                expect(path.join(project, 'www', 'subdir', 'sub-fixture-marker-page.html')).toExist();
+            });
     });
 
     it('should successfully run with existing, empty destination', function () {
-        shell.mkdir('-p', project);
+        fs.ensureDirSync(project);
         return create(project, appId, appName, {}, events)
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     describe('when --link-to is provided', function () {
@@ -315,6 +371,7 @@ describe('create end-to-end', function () {
 
                 // Check www/config exists
                 expect(path.join(project, 'www', 'config.xml')).toExist();
+
                 // Check www/config.xml was not updated.
                 var configXml = new ConfigParser(path.join(project, 'www', 'config.xml'));
                 expect(configXml.packageName()).toEqual('io.cordova.hellocordova');
@@ -323,6 +380,7 @@ describe('create end-to-end', function () {
 
                 // Check that config.xml was copied to project/config.xml
                 expect(path.join(project, 'config.xml')).toExist();
+
                 configXml = new ConfigParser(path.join(project, 'config.xml'));
                 expect(configXml.description()).toEqual('this is the correct config.xml');
                 // Check project/config.xml was updated.

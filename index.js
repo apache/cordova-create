@@ -17,13 +17,13 @@
     under the License.
 */
 
-var fs = require('fs');
+const fs = require('fs-extra');
+
 var os = require('os');
 var path = require('path');
 
 var Promise = require('q');
 var isUrl = require('is-url');
-var shell = require('shelljs');
 var requireFresh = require('import-fresh');
 var validateIdentifier = require('valid-identifier');
 
@@ -232,11 +232,11 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 copyIfNotExists(stockAssetPath('hooks'), path.join(dir, 'hooks'));
                 var configXmlExists = projectConfig(dir); // moves config to root if in www
                 if (!configXmlExists) {
-                    shell.cp(stockAssetPath('config.xml'), path.join(dir, 'config.xml'));
+                    fs.copySync(stockAssetPath('config.xml'), path.join(dir, 'config.xml'));
                 }
             } catch (e) {
                 if (!dirAlreadyExisted) {
-                    shell.rm('-rf', dir);
+                    fs.removeSync(dir);
                 }
                 if (process.platform.slice(0, 3) === 'win' && e.code === 'EPERM') {
                     throw new CordovaError('Symlinks on Windows require Administrator privileges');
@@ -266,8 +266,8 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             }
 
             // Create basic project structure.
-            shell.mkdir('-p', path.join(dir, 'platforms'));
-            shell.mkdir('-p', path.join(dir, 'plugins'));
+            fs.ensureDirSync(path.join(dir, 'platforms'));
+            fs.ensureDirSync(path.join(dir, 'plugins'));
 
             var configPath = path.join(dir, 'config.xml');
             // only update config.xml if not a symlink
@@ -290,8 +290,7 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
  */
 function copyIfNotExists (src, dst) {
     if (!fs.existsSync(dst) && src) {
-        shell.mkdir(dst);
-        shell.cp('-R', path.join(src, '*'), dst);
+        fs.copySync(src, dst);
     }
 }
 
@@ -310,7 +309,7 @@ function copyTemplateFiles (templateDir, projectDir, isSubDir) {
     // if template is a www dir
     if (path.basename(templateDir) === 'www') {
         copyPath = path.resolve(templateDir);
-        shell.cp('-R', copyPath, projectDir);
+        fs.copySync(copyPath, path.resolve(projectDir, 'www'));
     } else {
         var templateFiles = fs.readdirSync(templateDir);
         // Remove directories, and files that are unwanted
@@ -321,10 +320,10 @@ function copyTemplateFiles (templateDir, projectDir, isSubDir) {
             });
         }
         // Copy each template file after filter
-        for (var i = 0; i < templateFiles.length; i++) {
-            copyPath = path.resolve(templateDir, templateFiles[i]);
-            shell.cp('-R', copyPath, projectDir);
-        }
+        templateFiles.forEach(f => {
+            copyPath = path.resolve(templateDir, f);
+            fs.copySync(copyPath, path.resolve(projectDir, f));
+        });
     }
 }
 
@@ -373,9 +372,7 @@ function linkFromTemplate (templateDir, projectDir) {
     var linkSrc, linkDst, linkFolders, copySrc, copyDst;
     function rmlinkSync (src, dst, type) {
         if (src && dst) {
-            if (fs.existsSync(dst)) {
-                shell.rm('-rf', dst);
-            }
+            fs.removeSync(dst);
             if (fs.existsSync(src)) {
                 fs.symlinkSync(src, dst, type);
             }
@@ -403,7 +400,7 @@ function linkFromTemplate (templateDir, projectDir) {
     // if template/www/config.xml then copy to project/config.xml
     copyDst = path.join(projectDir, 'config.xml');
     if (!fs.existsSync(copyDst) && fs.existsSync(copySrc)) {
-        shell.cp(copySrc, projectDir);
+        fs.copySync(copySrc, copyDst);
     }
 }
 
