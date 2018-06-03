@@ -143,9 +143,6 @@ describe('create end-to-end', function () {
         expect(path.join(project, 'www', 'js')).not.toExist();
         expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
 
-        // Check if config files exist.
-        expect(path.join(project, 'www', 'index.html')).toExist();
-
         // Check that we got the right package.json
         const pkg = requireFresh(path.join(project, 'package.json'));
         expect(pkg.valid).toEqual('true');
