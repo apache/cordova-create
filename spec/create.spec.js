@@ -57,7 +57,7 @@ describe('cordova create checks for valid-identifier', function () {
 
 describe('create end-to-end', function () {
 
-    function checkProject () {
+    function checkProjectCommonArtifacts () {
         // Check if top level dirs exist.
         var dirs = ['hooks', 'platforms', 'plugins', 'www'];
         dirs.forEach(function (d) {
@@ -69,6 +69,9 @@ describe('create end-to-end', function () {
 
         // Check that index.html exists inside of www
         expect(path.join(project, 'www', 'index.html')).toExist();
+
+        // Check that www files don't get copied to the top level
+        expect(path.join(project, 'index.html')).not.toExist();
 
         // index.js and template subdir folder should not exist in top level
         // (inner files should be copied to the project top level folder)
@@ -87,8 +90,12 @@ describe('create end-to-end', function () {
         // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
     }
 
-    function checkConfigXml () {
-        checkProject();
+    function checkProjectArtifactsWithConfigFromTemplate () {
+        checkProjectCommonArtifacts();
+
+        // Check that standard js artifact does not exist
+        expect(path.join(project, 'www', 'js')).not.toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
 
         // Check that we got no package.json
         expect(path.join(project, 'package.json')).not.toExist();
@@ -98,11 +105,46 @@ describe('create end-to-end', function () {
         expect(configXml.description()).toEqual('this is the correct config.xml');
     }
 
-    function checkSubDir () {
-        checkProject();
+    function checkProjectArtifactsWithNoPackageFromTemplate () {
+        checkProjectCommonArtifacts();
+
+        // Check that standard js artifact does not exist
+        expect(path.join(project, 'www', 'js')).not.toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
+
+        // Check that we got no package.json
+        expect(path.join(project, 'package.json')).not.toExist();
+    }
+
+    function checkProjectArtifactsWithPackageFromTemplate () {
+        checkProjectCommonArtifacts();
+
+        // Check that standard js artifact exists
+        expect(path.join(project, 'www', 'js')).toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).toExist();
+
+        // Check if package.json exists.
+        expect(path.join(project, 'package.json')).toExist();
 
         // Check that we got package.json (the correct one)
         var pkjson = requireFresh(path.join(project, 'package.json'));
+        // Pkjson.displayName should equal config's name.
+        expect(pkjson.displayName).toEqual('TestBase');
+    }
+
+    function checkProjectArtifactsWithPackageFromSubDir () {
+        checkProjectCommonArtifacts();
+
+        // Check that standard js artifact does not exist
+        expect(path.join(project, 'www', 'js')).not.toExist();
+        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
+
+        // Check if config files exist.
+        expect(path.join(project, 'www', 'index.html')).toExist();
+
+        // Check that we got package.json (the correct one)
+        var pkjson = requireFresh(path.join(project, 'package.json'));
+
         // Pkjson.displayName should equal config's name.
         expect(pkjson.displayName).toEqual(appName);
         expect(pkjson.valid).toEqual('true');
@@ -116,7 +158,7 @@ describe('create end-to-end', function () {
         // Create a real project with no template
         // use default cordova-app-hello-world app
         return create(project, appId, appName, {}, events)
-            .then(checkProject)
+            .then(checkProjectArtifactsWithPackageFromTemplate)
             .then(function () {
                 var pkgJson = requireFresh(path.join(project, 'package.json'));
                 // confirm default hello world app copies over package.json and it matched appId
@@ -139,7 +181,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     it('should successfully run with NPM package', function () {
@@ -157,7 +199,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     it('should successfully run with NPM package and explicitly fetch latest if no version is given', function () {
@@ -176,7 +218,7 @@ describe('create end-to-end', function () {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
                 expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url + '@latest');
             })
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     it('should successfully run with template not having a package.json at toplevel', function () {
@@ -189,7 +231,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProject)
+            .then(checkProjectArtifactsWithNoPackageFromTemplate)
             .then(function () {
                 // Check that we got the right config.xml
                 var configXml = new ConfigParser(path.join(project, 'config.xml'));
@@ -207,7 +249,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProject);
+            .then(checkProjectArtifactsWithNoPackageFromTemplate);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and no package.json in subdirectory', function () {
@@ -220,7 +262,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProject);
+            .then(checkProjectArtifactsWithNoPackageFromTemplate);
     });
 
     it('should successfully run with template having package.json, and subdirectory, and package.json in subdirectory', function () {
@@ -233,7 +275,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkSubDir);
+            .then(checkProjectArtifactsWithPackageFromSubDir);
     });
 
     it('should successfully run config.xml in the www folder and move it outside', function () {
@@ -246,7 +288,7 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkConfigXml);
+            .then(checkProjectArtifactsWithConfigFromTemplate);
     });
 
     it('should successfully run with www folder as the template', function () {
@@ -259,13 +301,13 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkConfigXml);
+            .then(checkProjectArtifactsWithConfigFromTemplate);
     });
 
     it('should successfully run with existing, empty destination', function () {
         shell.mkdir('-p', project);
         return create(project, appId, appName, {}, events)
-            .then(checkProject);
+            .then(checkProjectArtifactsWithPackageFromTemplate);
     });
 
     describe('when --link-to is provided', function () {
