@@ -31,6 +31,7 @@ const {tmpDir, createWith, createWithMockFetch, expectRejection} = require('./he
 
 var appName = 'TestBase';
 var appId = 'org.testing';
+var appVersion = '1.0.0';
 var project = path.join(tmpDir, appName);
 
 // Setup and teardown test dirs
@@ -85,20 +86,31 @@ describe('create end-to-end', function () {
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.name()).toEqual(appName);
-        expect(configXml.version()).toEqual('1.0.0');
+        expect(configXml.version()).toEqual(appVersion);
 
         // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
     }
 
+    // Check that we got package.json and it was updated correctly
+    function checkPackageJson () {
+        const pkg = requireFresh(path.join(project, 'package.json'));
+        expect(pkg.name).toEqual(appId);
+        expect(pkg.displayName).toEqual(appName);
+        expect(pkg.version).toEqual(appVersion);
+    }
+
+    // Check that we got no package.json
+    function checkNoPackageJson () {
+        expect(path.join(project, 'package.json')).not.toExist();
+    }
+
     function checkProjectArtifactsWithConfigFromTemplate () {
         checkProjectCommonArtifacts();
+        checkNoPackageJson();
 
         // Check that standard js artifact does not exist
         expect(path.join(project, 'www', 'js')).not.toExist();
         expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
-
-        // Check that we got no package.json
-        expect(path.join(project, 'package.json')).not.toExist();
 
         // Check that we got the right config.xml from the template and not stock
         const configXml = new ConfigParser(path.join(project, 'config.xml'));
@@ -107,33 +119,25 @@ describe('create end-to-end', function () {
 
     function checkProjectArtifactsWithNoPackageFromTemplate () {
         checkProjectCommonArtifacts();
+        checkNoPackageJson();
 
         // Check that standard js artifact does not exist
         expect(path.join(project, 'www', 'js')).not.toExist();
         expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
-
-        // Check that we got no package.json
-        expect(path.join(project, 'package.json')).not.toExist();
     }
 
     function checkProjectArtifactsWithPackageFromTemplate () {
         checkProjectCommonArtifacts();
+        checkPackageJson();
 
         // Check that standard js artifact exists
         expect(path.join(project, 'www', 'js')).toExist();
         expect(path.join(project, 'www', 'js', 'index.js')).toExist();
-
-        // Check if package.json exists.
-        expect(path.join(project, 'package.json')).toExist();
-
-        // Check that we got package.json (the correct one)
-        var pkjson = requireFresh(path.join(project, 'package.json'));
-        // Pkjson.displayName should equal config's name.
-        expect(pkjson.displayName).toEqual('TestBase');
     }
 
     function checkProjectArtifactsWithPackageFromSubDir () {
         checkProjectCommonArtifacts();
+        checkPackageJson();
 
         // Check that standard js artifact does not exist
         expect(path.join(project, 'www', 'js')).not.toExist();
@@ -142,12 +146,9 @@ describe('create end-to-end', function () {
         // Check if config files exist.
         expect(path.join(project, 'www', 'index.html')).toExist();
 
-        // Check that we got package.json (the correct one)
-        var pkjson = requireFresh(path.join(project, 'package.json'));
-
-        // Pkjson.displayName should equal config's name.
-        expect(pkjson.displayName).toEqual(appName);
-        expect(pkjson.valid).toEqual('true');
+        // Check that we got the right package.json
+        const pkg = requireFresh(path.join(project, 'package.json'));
+        expect(pkg.valid).toEqual('true');
 
         // Check that we got the right config.xml
         const configXml = new ConfigParser(path.join(project, 'config.xml'));
