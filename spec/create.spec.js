@@ -87,8 +87,6 @@ describe('create end-to-end', function () {
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.name()).toEqual(appName);
         expect(configXml.version()).toEqual(appVersion);
-
-        // TODO (kamrik): check somehow that we got the right config.xml from the fixture and not some place else.
     }
 
     // Check that we got package.json and it was updated correctly
@@ -104,52 +102,43 @@ describe('create end-to-end', function () {
         expect(path.join(project, 'package.json')).not.toExist();
     }
 
+    // Check that we did use the default template
+    function checkDefaultTemplate () {
+        const pkg = requireFresh(path.join(project, 'package.json'));
+        expect(pkg.author).toEqual('Apache Cordova Team');
+
+        const configXml = new ConfigParser(path.join(project, 'config.xml'));
+        expect(configXml.author()).toEqual('Apache Cordova Team');
+    }
+
+    // Check that we did not use the default template
+    function checkNotDefaultTemplate () {
+        const configXml = new ConfigParser(path.join(project, 'config.xml'));
+        expect(configXml.author()).not.toEqual('Apache Cordova Team');
+    }
+
     function checkProjectArtifactsWithConfigFromTemplate () {
         checkProjectCommonArtifacts();
         checkNoPackageJson();
-
-        // Check that standard js artifact does not exist
-        expect(path.join(project, 'www', 'js')).not.toExist();
-        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
-
-        // Check that we got the right config.xml from the template and not stock
-        const configXml = new ConfigParser(path.join(project, 'config.xml'));
-        expect(configXml.description()).toEqual('this is the correct config.xml');
+        checkNotDefaultTemplate();
     }
 
     function checkProjectArtifactsWithNoPackageFromTemplate () {
         checkProjectCommonArtifacts();
         checkNoPackageJson();
-
-        // Check that standard js artifact does not exist
-        expect(path.join(project, 'www', 'js')).not.toExist();
-        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
+        checkNotDefaultTemplate();
     }
 
     function checkProjectArtifactsWithPackageFromTemplate () {
         checkProjectCommonArtifacts();
         checkPackageJson();
-
-        // Check that standard js artifact exists
-        expect(path.join(project, 'www', 'js')).toExist();
-        expect(path.join(project, 'www', 'js', 'index.js')).toExist();
+        checkDefaultTemplate();
     }
 
     function checkProjectArtifactsWithPackageFromSubDir () {
         checkProjectCommonArtifacts();
         checkPackageJson();
-
-        // Check that standard js artifact does not exist
-        expect(path.join(project, 'www', 'js')).not.toExist();
-        expect(path.join(project, 'www', 'js', 'index.js')).not.toExist();
-
-        // Check that we got the right package.json
-        const pkg = requireFresh(path.join(project, 'package.json'));
-        expect(pkg.valid).toEqual('true');
-
-        // Check that we got the right config.xml
-        const configXml = new ConfigParser(path.join(project, 'config.xml'));
-        expect(configXml.description()).toEqual('this is the correct config.xml');
+        checkNotDefaultTemplate();
     }
 
     it('should successfully run without template and use default hello-world app', function () {
