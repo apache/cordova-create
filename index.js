@@ -142,12 +142,6 @@ function cordovaCreate (dest, opts = {}) {
                     emit('verbose', 'Copying assets.');
                     fs.copySync(import_from_path, dir);
                 }
-
-                // If following were not copied from template, copy from stock app hello world
-                // TODO: get stock package.json if template does not contain package.json;
-                copyIfNotExists(stockAssetPath('www'), path.join(dir, 'www'));
-                copyIfNotExists(stockAssetPath('hooks'), path.join(dir, 'hooks'));
-                copyIfNotExists(stockAssetPath('config.xml'), path.join(dir, 'config.xml'));
             } catch (e) {
                 if (!dirAlreadyExisted) {
                     fs.removeSync(dir);
@@ -176,10 +170,6 @@ function cordovaCreate (dest, opts = {}) {
                 fs.writeFileSync(pkgjsonPath, JSON.stringify(pkgjson, null, 4), 'utf8');
             }
 
-            // Create basic project structure.
-            fs.ensureDirSync(path.join(dir, 'platforms'));
-            fs.ensureDirSync(path.join(dir, 'plugins'));
-
             // Write out id, name and default version to config.xml
             var configPath = path.join(dir, 'config.xml');
             var conf = new ConfigParser(configPath);
@@ -194,22 +184,6 @@ function getEventEmitter ({ events }) {
     return events
         ? (...args) => events.emit(...args)
         : () => {};
-}
-
-/**
- * Recursively copies folder to destination if folder is not found in destination (including symlinks).
- * @param  {string} src for copying
- * @param  {string} dst for copying
- * @return No return value
- */
-function copyIfNotExists (src, dst) {
-    if (!fs.existsSync(dst) && src) {
-        fs.copySync(src, dst);
-    }
-}
-
-function stockAssetPath (p) {
-    return path.join(require('cordova-app-hello-world').dirname, p);
 }
 
 // Creates temp dir that is deleted on process exit

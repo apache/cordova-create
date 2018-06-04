@@ -58,14 +58,8 @@ describe('cordova create checks for valid-identifier', function () {
 describe('create end-to-end', function () {
 
     function checkCommonArtifacts () {
-        // Check that top level dirs exist
-        var dirs = ['hooks', 'platforms', 'plugins', 'www'];
-        dirs.forEach(function (d) {
-            expect(path.join(project, d)).toExist();
-        });
-
-        // Check that README.md exists inside of hooks
-        expect(path.join(project, 'hooks', 'README.md')).toExist();
+        // Check that www dir exist
+        expect(path.join(project, 'www')).toExist();
 
         // Check that index.html exists inside of www
         expect(path.join(project, 'www', 'index.html')).toExist();
