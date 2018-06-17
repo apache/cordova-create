@@ -48,7 +48,7 @@
     "rewire": "^4.0.1"
   },
   "scripts": {
-    "test": "npm run eslint && npm run jasmine",
+    "test": "npm run eslint && npm run cover",
     "eslint": "eslint index.js spec/create.spec.js",
     "jasmine": "jasmine spec/create.spec.js",
     "cover": "nyc -x spec/ npm run jasmine"
