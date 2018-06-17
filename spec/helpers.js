@@ -17,12 +17,11 @@
     under the License.
 */
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
 
 const rewire = require('rewire');
-const shell = require('shelljs');
 
 // Disable regular console output during tests
 const CordovaLogger = require('cordova-common').CordovaLogger;
@@ -44,7 +43,7 @@ function createWithMockFetch (dir, id, name, cfg, events) {
     const fetchSpy = jasmine.createSpy('fetchSpy')
         .and.callFake(() => Promise.resolve(mockFetchDest));
 
-    shell.cp('-R', templateDir, mockFetchDest);
+    fs.copySync(templateDir, mockFetchDest);
     return createWith({fetch: fetchSpy})(dir, id, name, cfg, events)
         .then(() => fetchSpy);
 }
