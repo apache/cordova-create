@@ -21,7 +21,7 @@
     <name>HelloCordova</name>
     <description>this is the correct config.xml</description>
     <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
+        Apache Cordova Test Team
     </author>
     <content src="index.html" />
     <!-- Whitelist configuration. Refer to https://cordova.apache.org/docs/en/edge/guide_appdev_whitelist_index.md.html -->
