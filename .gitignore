@@ -15,3 +15,4 @@ config.gypi
 CVS
 node_modules/*
 node_module/.bin/*
+.nyc_output/
