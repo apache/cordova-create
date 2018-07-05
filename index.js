@@ -25,6 +25,7 @@ var path = require('path');
 var Q = require('q');
 var isUrl = require('is-url');
 var isObject = require('isobject');
+var pathIsInside = require('path-is-inside');
 var requireFresh = require('import-fresh');
 var validateIdentifier = require('valid-identifier');
 
@@ -119,19 +120,10 @@ function cordovaCreate (dest, opts = {}) {
             opts.template = true;
         }
 
-        // Make sure that the source www/ is not a direct ancestor of the
-        // target www/, or else we will recursively copy forever. To do this,
-        // we make sure that the shortest relative path from source-to-target
-        // must start by going up at least one directory or with a drive
-        // letter for Windows.
-        var rel_path = path.relative(opts.url, dir);
-        var goes_up = rel_path.split(path.sep)[0] === '..';
-
-        if (!(goes_up || rel_path[1] === ':')) {
+        // Ensure that the destination is outside the template location
+        if (pathIsInside(dir, opts.url)) {
             throw new CordovaError(
-                'Project dir "' + dir +
-                '" must not be created at/inside the template used to create the project "' +
-                opts.url + '".'
+                `Cannot create project "${dir}" inside the template used to create it "${opts.url}".`
             );
         }
     })
