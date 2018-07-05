@@ -133,10 +133,8 @@ function cordovaCreate (dest, opts = {}) {
                 return opts.url;
             }
 
-            var isGit = opts.template && isUrl(opts.url);
-            var isNPM = opts.template && (opts.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(opts.url))) && !isGit;
-            // Always use cordova fetch to obtain the npm or git template
-            if (isGit || isNPM) {
+            // Use cordova-fetch to obtain npm or git templates
+            if (opts.template && isRemoteUri(opts.url)) {
                 var target = opts.url;
                 events.emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, getSelfDestructingTempDir(), {})
@@ -362,4 +360,8 @@ function getSelfDestructingTempDir () {
         prefix: 'cordova-create-',
         unsafeCleanup: true
     }).name;
+}
+
+function isRemoteUri (uri) {
+    return isUrl(uri) || uri.includes('@') || !fs.existsSync(uri);
 }
