@@ -19,10 +19,10 @@
 
 const fs = require('fs-extra');
 
-var os = require('os');
 var path = require('path');
 
 var Q = require('q');
+var tmp = require('tmp');
 var isUrl = require('is-url');
 var isObject = require('isobject');
 var pathIsInside = require('path-is-inside');
@@ -36,9 +36,6 @@ var ConfigParser = require('cordova-common').ConfigParser;
 var CordovaLogger = require('cordova-common').CordovaLogger.get();
 
 const DEFAULT_VERSION = '1.0.0';
-
-// Global configuration paths
-var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
 
 /**
  * Sets up to forward events to another instance, or log console.
@@ -140,16 +137,9 @@ function cordovaCreate (dest, opts = {}) {
             var isNPM = opts.template && (opts.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(opts.url))) && !isGit;
             // Always use cordova fetch to obtain the npm or git template
             if (isGit || isNPM) {
-                // Saved to .Cordova folder (ToDo: Delete installed template after using)
-                var tempDest = global_config_path;
                 var target = opts.url;
-                // add latest to npm module if no version is specified
-                // this prevents create using an older cached version of the template
-                if (isNPM && target.indexOf('@') === -1) {
-                    target = opts.url + '@latest';
-                }
                 events.emit('verbose', 'Using cordova-fetch for ' + target);
-                return fetch(target, tempDest, {})
+                return fetch(target, getSelfDestructingTempDir(), {})
                     .catch(function (err) {
                         events.emit('error', '\x1B[1m \x1B[31m Error from Cordova Fetch: ' + err.message);
                         events.emit('error', 'The template you are trying to use is invalid.' +
@@ -364,4 +354,12 @@ function linkFromTemplate (templateDir, projectDir) {
 
 function stockAssetPath (p) {
     return path.join(require('cordova-app-hello-world').dirname, p);
+}
+
+// Creates temp dir that is deleted on process exit
+function getSelfDestructingTempDir () {
+    return tmp.dirSync({
+        prefix: 'cordova-create-',
+        unsafeCleanup: true
+    }).name;
 }

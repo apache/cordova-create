@@ -153,7 +153,7 @@ describe('create end-to-end', function () {
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
-    it('should successfully run with NPM package', function () {
+    it('should successfully run with NPM package (specific version)', function () {
         // Create a real project with npm module as template
         var config = {
             lib: {
@@ -171,9 +171,8 @@ describe('create end-to-end', function () {
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
-    it('should successfully run with NPM package and explicitly fetch latest if no version is given', function () {
+    it('should successfully run with NPM package (no specific version)', function () {
         // Create a real project with npm module as template
-        // TODO fetch should be responsible for the cache busting part of this test
         var config = {
             lib: {
                 www: {
@@ -185,7 +184,7 @@ describe('create end-to-end', function () {
         return createWithMockFetch(project, appId, appName, config, events)
             .then(fetchSpy => {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
-                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url + '@latest');
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
             })
             .then(checkProjectCreatedWithDefaultTemplate);
     });
