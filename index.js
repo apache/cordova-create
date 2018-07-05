@@ -19,12 +19,13 @@
 
 const fs = require('fs-extra');
 
-var os = require('os');
 var path = require('path');
 
-var Promise = require('q');
+var Q = require('q');
+var tmp = require('tmp');
 var isUrl = require('is-url');
 var isObject = require('isobject');
+var pathIsInside = require('path-is-inside');
 var requireFresh = require('import-fresh');
 var validateIdentifier = require('valid-identifier');
 
@@ -35,9 +36,6 @@ var ConfigParser = require('cordova-common').ConfigParser;
 var CordovaLogger = require('cordova-common').CordovaLogger.get();
 
 const DEFAULT_VERSION = '1.0.0';
-
-// Global configuration paths
-var global_config_path = process.env.CORDOVA_HOME || path.join(os.homedir(), '.cordova');
 
 /**
  * Sets up to forward events to another instance, or log console.
@@ -58,31 +56,47 @@ function setupEvents (externalEventEmitter) {
     return events;
 }
 
-/**
- * Usage:
- * @dir - directory where the project will be created. Required.
- * @optionalId - app id. Required (but be "undefined")
- * @optionalName - app name. Required (but can be "undefined").
- * @cfg - extra config to be saved in .cordova/config.json Required (but can be "{}").
- * @extEvents - An EventEmitter instance that will be used for logging purposes. Required (but can be "undefined").
- **/
-// Returns a promise.
-module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
-    return Promise.resolve().then(function () {
-        events = setupEvents(extEvents);
-        events.emit('verbose', 'Using detached cordova-create');
+module.exports = cordovaCreateLegacyAdapter;
 
+/**
+* Legacy interface. See README for documentation
+*/
+function cordovaCreateLegacyAdapter (dir, id, name, cfg, extEvents) {
+    // Unwrap and shallow-clone that nasty nested config object
+    const opts = Object.assign({}, ((cfg || {}).lib || {}).www);
+
+    if (id) opts.id = id;
+    if (name) opts.name = name;
+    if (extEvents) opts.extEvents = extEvents;
+
+    return Q(cordovaCreate(dir, opts));
+}
+
+/**
+ * Creates a new cordova project in the given directory.
+ *
+ * @param {string} dest         directory where the project will be created.
+ * @param {Object} [opts={}]    options to be used for creating the project.
+ * @returns {Promise}           Resolves when project creation has finished.
+ */
+function cordovaCreate (dest, opts = {}) {
+    // TODO this is to avoid having a huge diff. Remove later.
+    let dir = dest;
+
+    return Promise.resolve().then(function () {
         if (!dir) {
             throw new CordovaError('Directory not specified. See `cordova help`.');
         }
 
-        cfg = cfg || {};
-        if (!isObject(cfg)) {
-            throw new CordovaError('If given, cfg must be an object');
+        if (!isObject(opts)) {
+            throw new CordovaError('Given options must be an object');
         }
 
-        if (optionalId) cfg.id = optionalId;
-        if (optionalName) cfg.name = optionalName;
+        // Shallow copy opts
+        opts = Object.assign({}, opts);
+
+        events = setupEvents(opts.extEvents);
+        events.emit('verbose', 'Using detached cordova-create');
 
         // Make absolute.
         dir = path.resolve(dir);
@@ -91,33 +105,22 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             throw new CordovaError('Path already exists and is not empty: ' + dir);
         }
 
-        if (cfg.id && !validateIdentifier(cfg.id)) {
+        if (opts.id && !validateIdentifier(opts.id)) {
             throw new CordovaError('App id contains a reserved word, or is not a valid identifier.');
         }
 
         // This was changed from "uri" to "url", but checking uri for backwards compatibility.
-        cfg.lib = cfg.lib || {};
-        cfg.lib.www = cfg.lib.www || {};
-        cfg.lib.www.url = cfg.lib.www.url || cfg.lib.www.uri;
+        opts.url = opts.url || opts.uri;
 
-        if (!cfg.lib.www.url) {
-            cfg.lib.www.url = require.resolve('cordova-app-hello-world');
-            cfg.lib.www.template = true;
+        if (!opts.url) {
+            opts.url = require.resolve('cordova-app-hello-world');
+            opts.template = true;
         }
 
-        // Make sure that the source www/ is not a direct ancestor of the
-        // target www/, or else we will recursively copy forever. To do this,
-        // we make sure that the shortest relative path from source-to-target
-        // must start by going up at least one directory or with a drive
-        // letter for Windows.
-        var rel_path = path.relative(cfg.lib.www.url, dir);
-        var goes_up = rel_path.split(path.sep)[0] === '..';
-
-        if (!(goes_up || rel_path[1] === ':')) {
+        // Ensure that the destination is outside the template location
+        if (pathIsInside(dir, opts.url)) {
             throw new CordovaError(
-                'Project dir "' + dir +
-                '" must not be created at/inside the template used to create the project "' +
-                cfg.lib.www.url + '".'
+                `Cannot create project "${dir}" inside the template used to create it "${opts.url}".`
             );
         }
     })
@@ -126,34 +129,18 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             events.emit('log', 'Creating a new cordova project.');
 
             // If symlink, don't fetch
-            if (cfg.lib.www.link) {
-                return cfg.lib.www.url;
+            if (opts.link) {
+                return opts.url;
             }
 
-            var isGit = cfg.lib.www.template && isUrl(cfg.lib.www.url);
-            var isNPM = cfg.lib.www.template && (cfg.lib.www.url.indexOf('@') > -1 || !fs.existsSync(path.resolve(cfg.lib.www.url))) && !isGit;
-            // Always use cordova fetch to obtain the npm or git template
-            if (isGit || isNPM) {
-                // Saved to .Cordova folder (ToDo: Delete installed template after using)
-                var tempDest = global_config_path;
-                var target = cfg.lib.www.url;
-                // add latest to npm module if no version is specified
-                // this prevents create using an older cached version of the template
-                if (isNPM && target.indexOf('@') === -1) {
-                    target = cfg.lib.www.url + '@latest';
-                }
+            // Use cordova-fetch to obtain npm or git templates
+            if (opts.template && isRemoteUri(opts.url)) {
+                var target = opts.url;
                 events.emit('verbose', 'Using cordova-fetch for ' + target);
-                return fetch(target, tempDest, {})
-                    .catch(function (err) {
-                        events.emit('error', '\x1B[1m \x1B[31m Error from Cordova Fetch: ' + err.message);
-                        events.emit('error', 'The template you are trying to use is invalid.' +
-                        ' Make sure you follow the template guide found here https://cordova.apache.org/docs/en/latest/guide/cli/template.html.' +
-                        ' Templates now require a package.json.');
-                        throw err;
-                    });
-            // If assets are not online, resolve as a relative path on local computer
+                return fetch(target, getSelfDestructingTempDir(), {});
             } else {
-                return path.resolve(cfg.lib.www.url);
+                // If assets are not online, resolve as a relative path on local computer
+                return path.resolve(opts.url);
             }
         })
         .then(function (input_directory) {
@@ -184,13 +171,13 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
 
             try {
                 // Copy files from template to project
-                if (cfg.lib.www.template) {
+                if (opts.template) {
                     events.emit('verbose', 'Copying assets.');
                     copyTemplateFiles(import_from_path, dir, isSubDir);
                 }
 
                 // If --link, link merges, hooks, www, and config.xml (and/or copy to root)
-                if (cfg.lib.www.link) {
+                if (opts.link) {
                     events.emit('verbose', 'Symlinking assets.');
                     linkFromTemplate(import_from_path, dir);
                 }
@@ -219,12 +206,12 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
                 var pkgjson = requireFresh(pkgjsonPath);
 
                 // Pkjson.displayName should equal config's name.
-                if (cfg.name) {
-                    pkgjson.displayName = cfg.name;
+                if (opts.name) {
+                    pkgjson.displayName = opts.name;
                 }
                 // Pkjson.name should equal config's id.
-                if (cfg.id) {
-                    pkgjson.name = cfg.id.toLowerCase();
+                if (opts.id) {
+                    pkgjson.name = opts.id.toLowerCase();
                 } else {
                     // Use default name.
                     pkgjson.name = 'helloworld';
@@ -243,13 +230,13 @@ module.exports = function (dir, optionalId, optionalName, cfg, extEvents) {
             if (!fs.lstatSync(configPath).isSymbolicLink()) {
                 // Write out id, name and default version to config.xml
                 var conf = new ConfigParser(configPath);
-                if (cfg.id) conf.setPackageName(cfg.id);
-                if (cfg.name) conf.setName(cfg.name);
+                if (opts.id) conf.setPackageName(opts.id);
+                if (opts.name) conf.setName(opts.name);
                 conf.setVersion(DEFAULT_VERSION);
                 conf.write();
             }
         });
-};
+}
 
 /**
  * Recursively copies folder to destination if folder is not found in destination (including symlinks).
@@ -358,4 +345,16 @@ function linkFromTemplate (templateDir, projectDir) {
 
 function stockAssetPath (p) {
     return path.join(require('cordova-app-hello-world').dirname, p);
+}
+
+// Creates temp dir that is deleted on process exit
+function getSelfDestructingTempDir () {
+    return tmp.dirSync({
+        prefix: 'cordova-create-',
+        unsafeCleanup: true
+    }).name;
+}
+
+function isRemoteUri (uri) {
+    return isUrl(uri) || uri.includes('@') || !fs.existsSync(uri);
 }
