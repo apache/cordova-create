@@ -34,13 +34,13 @@ var create = require('cordova-create');
 create(dir, id, name, cfg, extEvents);
 ```
 
- `dir` - directory where the project will be created. Required.
- `id` - app id. Required (but can be "undefined").
- `name` - app name. Required (but can be "undefined"). 
- `cfg` - extra config to be saved in .cordova/config.json Required (but can be "{}").
- `extEvents` - An EventEmitter instance that will be used for logging purposes. Required (but can be "undefined").
+- `dir` - directory where the project will be created. Required.
+- `id` - app id. Required (but can be "undefined").
+- `name` - app name. Required (but can be "undefined"). 
+- `cfg` - extra config to be saved in .cordova/config.json Required (but can be "{}").
+- `extEvents` - An EventEmitter instance that will be used for logging purposes. Required (but can be "undefined").
 
-An example of cfg which would fetch a cordova template from npm (or git):
+An example of `cfg` which would fetch a cordova template from npm (or git):
 
 ```
 var cfg = {
