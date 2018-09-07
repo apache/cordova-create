@@ -27,7 +27,7 @@
 This module is used for creating cordova style projects. It also incudes support for [cordova templates](http://cordova.apache.org/docs/en/latest/guide/cli/template.html). It can fetch templates from npm and git.
 
 ## Usage:
-:
+
 ```
 var create = require('cordova-create');
 
