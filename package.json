@@ -33,7 +33,6 @@
     "is-url": "^1.2.4",
     "isobject": "^3.0.1",
     "path-is-inside": "^1.0.2",
-    "q": "^1.5.1",
     "tmp": "0.0.33",
     "valid-identifier": "0.0.1"
   },
