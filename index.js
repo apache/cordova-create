@@ -21,7 +21,6 @@ const fs = require('fs-extra');
 
 var path = require('path');
 
-var Q = require('q');
 var tmp = require('tmp');
 var isUrl = require('is-url');
 var isObject = require('isobject');
@@ -69,7 +68,7 @@ function cordovaCreateLegacyAdapter (dir, id, name, cfg, extEvents) {
     if (name) opts.name = name;
     if (extEvents) opts.extEvents = extEvents;
 
-    return Q(cordovaCreate(dir, opts));
+    return cordovaCreate(dir, opts);
 }
 
 /**
