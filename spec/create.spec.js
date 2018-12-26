@@ -27,7 +27,7 @@ var create = require('..');
 var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
-const {tmpDir, createWith, createWithMockFetch, expectRejection} = require('./helpers');
+const { tmpDir, createWith, createWithMockFetch, expectRejection } = require('./helpers');
 
 const appName = 'TestBase';
 const appId = 'org.testing';
@@ -469,7 +469,7 @@ describe('when shit happens', function () {
         const failingFetch = jasmine.createSpy('failingFetch')
             .and.callFake(() => Promise.reject(fetchError));
         return expectRejection(
-            createWith({fetch: failingFetch})(project, appId, appName, config),
+            createWith({ fetch: failingFetch })(project, appId, appName, config),
             fetchError
         );
 
