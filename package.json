@@ -25,9 +25,9 @@
   },
   "engineStrict": true,
   "dependencies": {
-    "cordova-app-hello-world": "^3.11.0",
-    "cordova-common": "^2.2.0",
-    "cordova-fetch": "^1.3.0",
+    "cordova-app-hello-world": "^4.0.0",
+    "cordova-common": "^3.0.0",
+    "cordova-fetch": "^2.0.0",
     "fs-extra": "^7.0.1",
     "import-fresh": "^3.0.0",
     "is-url": "^1.2.4",
