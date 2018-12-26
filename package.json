@@ -17,7 +17,7 @@
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://issues.apache.org/jira/browse/CB",
+    "url": "https://github.com/apache/cordova-create/issues",
     "email": "dev@cordova.apache.org"
   },
   "engines": {
