@@ -20,6 +20,26 @@
 -->
 # Cordova-create Release Notes
 
+### 2.0.0 (Jan 07, 2019)
+* Updated Cordova Package Dependencies (#36) & (#38)
+* Updated External Package Dependencies (#35) & (#38)
+* Updated `package.json` bug tracker link (#37)
+* Drop Q, use native promises (#33)
+* Update Apache License version in test fixture (#32)
+* Fix version in package-lock.json (#30)
+* Commit package-lock.json (#28)
+* Mark 2.0.0-dev (major update) (#27)
+* Reformat & cleanup `README`
+* Non-breaking cleanup & improvements (#20)
+* Update nyc and ignore HTML coverage reports
+* Determine code coverage during tests (#17)
+* [CB-14140](https://issues.apache.org/jira/browse/CB-14140) Use fs-extra instead of shelljs (#19)
+* Drop support for reading from .cordova/config.json (#18)
+* Refactor tests (#16)
+* Fix error messages for toExist matcher (#15)
+* Major code cleanup (Remove deadcode, cleanup, refactor, update dependencies, etc.) #13
+* Update node versions for CI and drop support for node 4 (#12)
+
 ### 1.1.2 (Dec 14, 2017)
 * [CB-12807](https://issues.apache.org/jira/browse/CB-12807): updated error message to follow the template guide
 * [CB-13674](https://issues.apache.org/jira/browse/CB-13674): updated deps
