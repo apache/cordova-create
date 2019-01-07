@@ -26,7 +26,7 @@
   "engineStrict": true,
   "dependencies": {
     "cordova-app-hello-world": "^4.0.0",
-    "cordova-common": "^3.0.0",
+    "cordova-common": "^3.1.0",
     "cordova-fetch": "^2.0.0",
     "fs-extra": "^7.0.1",
     "import-fresh": "^3.0.0",
@@ -34,14 +34,14 @@
     "isobject": "^3.0.1",
     "path-is-inside": "^1.0.2",
     "tmp": "0.0.33",
-    "valid-identifier": "0.0.1"
+    "valid-identifier": "0.0.2"
   },
   "devDependencies": {
-    "eslint": "^5.11.0",
+    "eslint": "^5.12.0",
     "eslint-config-semistandard": "^13.0.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
     "jasmine": "^3.3.1",
