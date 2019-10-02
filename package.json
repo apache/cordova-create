@@ -21,7 +21,7 @@
     "email": "dev@cordova.apache.org"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=10"
   },
   "dependencies": {
     "cordova-app-hello-world": "^4.0.0",
