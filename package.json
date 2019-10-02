@@ -51,7 +51,7 @@
     "test": "npm run eslint && npm run cover",
     "eslint": "eslint index.js spec/create.spec.js",
     "jasmine": "jasmine \"spec/**/*.spec.js\"",
-    "cover": "nyc -x spec/ npm run jasmine"
+    "cover": "nyc npm run jasmine"
   },
   "contributors": [
     {
@@ -62,5 +62,14 @@
       "name": "Steve Gill",
       "email": "stevengill97@gmail.com"
     }
-  ]
+  ],
+  "nyc": {
+    "include": [
+      "index.js"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ]
+  }
 }
