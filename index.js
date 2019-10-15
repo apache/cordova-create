@@ -32,21 +32,7 @@ var fetch = require('cordova-fetch');
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
 
-module.exports = cordovaCreateLegacyAdapter;
-
-/**
-* Legacy interface. See README for documentation
-*/
-function cordovaCreateLegacyAdapter (dir, id, name, cfg, extEvents) {
-    // Unwrap and shallow-clone that nasty nested config object
-    const opts = Object.assign({}, ((cfg || {}).lib || {}).www);
-
-    if (id) opts.id = id;
-    if (name) opts.name = name;
-    if (extEvents) opts.events = extEvents;
-
-    return cordovaCreate(dir, opts);
-}
+module.exports = cordovaCreate;
 
 /**
  * Creates a new cordova project in the given directory.
@@ -86,18 +72,14 @@ function cordovaCreate (dest, opts = {}) {
             throw new CordovaError('App id contains a reserved word, or is not a valid identifier.');
         }
 
-        // This was changed from "uri" to "url", but checking uri for backwards compatibility.
-        opts.url = opts.url || opts.uri;
-
-        if (!opts.url) {
-            opts.url = require.resolve('cordova-app-hello-world');
-            opts.template = true;
+        if (!opts.template) {
+            opts.template = require.resolve('cordova-app-hello-world');
         }
 
         // Ensure that the destination is outside the template location
-        if (pathIsInside(dir, opts.url)) {
+        if (pathIsInside(dir, opts.template)) {
             throw new CordovaError(
-                `Cannot create project "${dir}" inside the template used to create it "${opts.url}".`
+                `Cannot create project "${dir}" inside the template used to create it "${opts.template}".`
             );
         }
     })
@@ -106,13 +88,13 @@ function cordovaCreate (dest, opts = {}) {
             emit('log', 'Creating a new cordova project.');
 
             // Use cordova-fetch to obtain npm or git templates
-            if (opts.template && isRemoteUri(opts.url)) {
-                var target = opts.url;
+            if (isRemoteUri(opts.template)) {
+                var target = opts.template;
                 emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, getSelfDestructingTempDir(), {});
             } else {
                 // If assets are not online, resolve as a relative path on local computer
-                return path.resolve(opts.url);
+                return path.resolve(opts.template);
             }
         })
         .then(function (templatePath) {
@@ -136,10 +118,8 @@ function cordovaCreate (dest, opts = {}) {
 
             try {
                 // Copy files from template to project
-                if (opts.template) {
-                    emit('verbose', 'Copying assets.');
-                    fs.copySync(import_from_path, dir);
-                }
+                emit('verbose', 'Copying assets.');
+                fs.copySync(import_from_path, dir);
             } catch (e) {
                 if (!dirAlreadyExisted) {
                     fs.removeSync(dir);

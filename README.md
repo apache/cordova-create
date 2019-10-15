@@ -29,27 +29,31 @@ This module is used for creating cordova style projects. It also incudes support
 ## Usage:
 
 ```
-var create = require('cordova-create');
+const create = require('cordova-create');
 
-create(dir, id, name, cfg, extEvents);
+await create(dest, opts);
 ```
 
-- `dir` - directory where the project will be created. Required.
-- `id` - app id. Required (but can be "undefined").
-- `name` - app name. Required (but can be "undefined").
-- `cfg` - extra config to be saved in .cordova/config.json Required (but can be "{}").
-- `extEvents` - An EventEmitter instance that will be used for logging purposes. Required (but can be "undefined").
+### Parameters
 
-An example of `cfg` which would fetch a cordova template from npm (or git):
+#### `dest`
+_Required_. Path to the destination where the project will be created. Must be an empty dir if it exists.
+
+#### `opts`
+_Optional_. Supports following properties.
 
 ```
-var cfg = {
-    lib: {
-        www: {
-            template: true,
-            url: 'cordova-app-hello-world',
-            version: ''
-        }
-    }
-};
+{
+    // Attributes to be set in package.json & config.xml
+    id: String,
+    name: String,
+    version: String,
+
+    // The path/url/package-name to the template that should be used
+    template: String,
+
+    // An EventEmitter instance that will be used for logging purposes
+    // (actually it only needs to implement a compatible `emit` method)
+    events: EventEmitter
+}
 ```

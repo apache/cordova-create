@@ -24,7 +24,6 @@ var path = require('path');
 var requireFresh = require('import-fresh');
 
 var create = require('..');
-var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
 const { tmpDir, createWith, createWithMockFetch, expectRejection } = require('./helpers');
@@ -34,9 +33,11 @@ const appId = 'org.testing';
 const appVersion = '1.0.0';
 const project = path.join(tmpDir, appName);
 
-// Setup and teardown test dirs
+let opts;
+
 beforeEach(function () {
     fs.emptyDirSync(tmpDir);
+    opts = { name: appName, id: appId };
 });
 afterAll(function () {
     process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
@@ -47,11 +48,13 @@ describe('cordova create checks for valid-identifier', function () {
     const error = new CordovaError('is not a valid identifier');
 
     it('should reject reserved words from start of id', function () {
-        return expectRejection(create(project, 'int.bob', appName, {}, events), error);
+        opts.id = 'int.bob';
+        return expectRejection(create(project, opts), error);
     });
 
     it('should reject reserved words from end of id', function () {
-        return expectRejection(create(project, 'bob.class', appName, {}, events), error);
+        opts.id = 'bob.class';
+        return expectRejection(create(project, opts), error);
     });
 });
 
@@ -120,89 +123,54 @@ describe('create end-to-end', function () {
     it('should successfully run without template and use default hello-world app', function () {
         // Create a real project with no template
         // use default cordova-app-hello-world app
-        return create(project, appId, appName, {}, events)
+        return create(project, opts)
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with Git URL', function () {
         // Create a real project with git URL as template
-        var config = {
-            lib: {
-                www: {
-                    url: 'https://github.com/apache/cordova-app-hello-world',
-                    template: true
-                }
-            }
-        };
-        return createWithMockFetch(project, appId, appName, config, events)
+        opts.template = 'https://github.com/apache/cordova-app-hello-world';
+        return createWithMockFetch(project, opts)
             .then(fetchSpy => {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
-                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(opts.template);
             })
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with NPM package (specific version)', function () {
         // Create a real project with npm module as template
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: 'phonegap-template-vue-f7-tabs@1'
-                }
-            }
-        };
-        return createWithMockFetch(project, appId, appName, config, events)
+        opts.template = 'phonegap-template-vue-f7-tabs@1';
+        return createWithMockFetch(project, opts)
             .then(fetchSpy => {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
-                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(opts.template);
             })
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with NPM package (no specific version)', function () {
         // Create a real project with npm module as template
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: 'phonegap-template-vue-f7-tabs'
-                }
-            }
-        };
-        return createWithMockFetch(project, appId, appName, config, events)
+        opts.template = 'phonegap-template-vue-f7-tabs';
+        return createWithMockFetch(project, opts)
             .then(fetchSpy => {
                 expect(fetchSpy).toHaveBeenCalledTimes(1);
-                expect(fetchSpy.calls.argsFor(0)[0]).toBe(config.lib.www.url);
+                expect(fetchSpy.calls.argsFor(0)[0]).toBe(opts.template);
             })
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should successfully run with local template having no package.json in template dir', function () {
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: path.join(__dirname, 'templates', 'withsubdirectory')
-                }
-            }
-        };
-        return create(project, appId, appName, config, events)
+        opts.template = path.join(__dirname, 'templates/withsubdirectory');
+        return create(project, opts)
             .then(checkCommonArtifacts)
             .then(checkNoPackageJson)
             .then(checkNotDefaultTemplate);
     });
 
     it('should successfully run with local template having package.json in template dir', function () {
-        var config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: path.join(__dirname, 'templates', 'withsubdirectory_package_json')
-                }
-            }
-        };
-        return create(project, appId, appName, config, events)
+        opts.template = path.join(__dirname, 'templates/withsubdirectory_package_json');
+        return create(project, opts)
             .then(checkCommonArtifacts)
             .then(checkPackageJson)
             .then(checkNotDefaultTemplate);
@@ -210,7 +178,7 @@ describe('create end-to-end', function () {
 
     it('should successfully run with existing, empty destination', function () {
         fs.ensureDirSync(project);
-        return create(project, appId, appName, {}, events)
+        return create(project, opts)
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 });
@@ -218,62 +186,43 @@ describe('create end-to-end', function () {
 describe('when shit happens', function () {
     it('should fail when dir is missing', function () {
         return expectRejection(
-            create(null, appId, appName, {}, events),
+            create(null, opts),
             new CordovaError('Directory not specified')
         );
     });
 
     it('should fail when dir already exists', function () {
         return expectRejection(
-            create(__dirname, appId, appName, {}, events),
+            create(__dirname, opts),
             new CordovaError('Path already exists and is not empty')
         );
     });
 
     it('should fail when destination is inside template', function () {
-        const config = {
-            lib: {
-                www: {
-                    url: path.join(tmpDir, 'template')
-                }
-            }
-        };
-        const destination = path.join(config.lib.www.url, 'destination');
+        opts.template = path.join(tmpDir, 'template');
         return expectRejection(
-            create(destination, appId, appName, config, events),
+            create(path.join(opts.template, 'destination'), opts),
             new CordovaError('inside the template')
         );
     });
 
     it('should fail when fetch fails', function () {
-        const config = {
-            lib: {
-                www: {
-                    template: true,
-                    url: 'http://localhost:123456789/cordova-create'
-                }
-            }
-        };
         const fetchError = new Error('Fetch fail');
         const failingFetch = jasmine.createSpy('failingFetch')
             .and.callFake(() => Promise.reject(fetchError));
+
+        opts.template = 'http://localhost:123456789/cordova-create';
         return expectRejection(
-            createWith({ fetch: failingFetch })(project, appId, appName, config),
+            createWith({ fetch: failingFetch })(project, opts),
             fetchError
         );
-
     });
 
-    it('should fail when template does not exist', function () {
-        const config = {
-            lib: {
-                www: {
-                    url: path.join(__dirname, 'doesnotexist')
-                }
-            }
-        };
+    // FIXME: we need to improve isRemote to make this different from the test above
+    xit('should fail when template does not exist', function () {
+        opts.template = path.join(__dirname, 'doesnotexist');
         return expectRejection(
-            create(project, appId, appName, config, events),
+            create(project, opts),
             new CordovaError('not a valid template')
         );
     });
