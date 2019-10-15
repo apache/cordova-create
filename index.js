@@ -29,31 +29,10 @@ var requireFresh = require('import-fresh');
 var validateIdentifier = require('valid-identifier');
 
 var fetch = require('cordova-fetch');
-var events = require('cordova-common').events;
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
-var CordovaLogger = require('cordova-common').CordovaLogger.get();
 
 const DEFAULT_VERSION = '1.0.0';
-
-/**
- * Sets up to forward events to another instance, or log console.
- * This will make the create internal events visible outside
- * @param  {EventEmitter} externalEventEmitter An EventEmitter instance that will be used for
- *   logging purposes. If no EventEmitter provided, all events will be logged to console
- * @return {EventEmitter}
- */
-function setupEvents (externalEventEmitter) {
-    if (externalEventEmitter) {
-        // This will make the platform internal events visible outside
-        events.forwardEventsTo(externalEventEmitter);
-    // There is no logger if external emitter is not present,
-    // so attach a console logger
-    } else {
-        CordovaLogger.subscribe(events);
-    }
-    return events;
-}
 
 module.exports = cordovaCreateLegacyAdapter;
 
@@ -66,7 +45,7 @@ function cordovaCreateLegacyAdapter (dir, id, name, cfg, extEvents) {
 
     if (id) opts.id = id;
     if (name) opts.name = name;
-    if (extEvents) opts.extEvents = extEvents;
+    if (extEvents) opts.events = extEvents;
 
     return cordovaCreate(dir, opts);
 }
@@ -79,6 +58,7 @@ function cordovaCreateLegacyAdapter (dir, id, name, cfg, extEvents) {
  * @returns {Promise}           Resolves when project creation has finished.
  */
 function cordovaCreate (dest, opts = {}) {
+    let emit;
     // TODO this is to avoid having a huge diff. Remove later.
     let dir = dest;
 
@@ -94,8 +74,8 @@ function cordovaCreate (dest, opts = {}) {
         // Shallow copy opts
         opts = Object.assign({}, opts);
 
-        events = setupEvents(opts.extEvents);
-        events.emit('verbose', 'Using detached cordova-create');
+        emit = getEventEmitter(opts);
+        emit('verbose', 'Using detached cordova-create');
 
         // Make absolute.
         dir = path.resolve(dir);
@@ -125,7 +105,7 @@ function cordovaCreate (dest, opts = {}) {
     })
         .then(function () {
             // Finally, Ready to start!
-            events.emit('log', 'Creating a new cordova project.');
+            emit('log', 'Creating a new cordova project.');
 
             // If symlink, don't fetch
             if (opts.link) {
@@ -135,7 +115,7 @@ function cordovaCreate (dest, opts = {}) {
             // Use cordova-fetch to obtain npm or git templates
             if (opts.template && isRemoteUri(opts.url)) {
                 var target = opts.url;
-                events.emit('verbose', 'Using cordova-fetch for ' + target);
+                emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, getSelfDestructingTempDir(), {});
             } else {
                 // If assets are not online, resolve as a relative path on local computer
@@ -154,7 +134,7 @@ function cordovaCreate (dest, opts = {}) {
                     isSubDir = true;
                 }
             } catch (e) {
-                events.emit('verbose', 'index.js does not specify valid sub-directory: ' + input_directory);
+                emit('verbose', 'index.js does not specify valid sub-directory: ' + input_directory);
                 isSubDir = false;
             }
 
@@ -171,13 +151,13 @@ function cordovaCreate (dest, opts = {}) {
             try {
                 // Copy files from template to project
                 if (opts.template) {
-                    events.emit('verbose', 'Copying assets.');
+                    emit('verbose', 'Copying assets.');
                     copyTemplateFiles(import_from_path, dir, isSubDir);
                 }
 
                 // If --link, link merges, hooks, www, and config.xml (and/or copy to root)
                 if (opts.link) {
-                    events.emit('verbose', 'Symlinking assets.');
+                    emit('verbose', 'Symlinking assets.');
                     linkFromTemplate(import_from_path, dir);
                 }
 
@@ -235,6 +215,12 @@ function cordovaCreate (dest, opts = {}) {
                 conf.write();
             }
         });
+}
+
+function getEventEmitter ({ events }) {
+    return events
+        ? (...args) => events.emit(...args)
+        : () => {};
 }
 
 /**
