@@ -79,7 +79,6 @@ describe('create end-to-end', function () {
         var configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.name()).toEqual(appName);
-        expect(configXml.version()).toEqual(appVersion);
     }
 
     // Check that we got package.json and it was updated correctly
@@ -87,7 +86,6 @@ describe('create end-to-end', function () {
         const pkg = requireFresh(path.join(project, 'package.json'));
         expect(pkg.name).toEqual(appId);
         expect(pkg.displayName).toEqual(appName);
-        expect(pkg.version).toEqual(appVersion);
     }
 
     // Check that we got no package.json
@@ -99,21 +97,18 @@ describe('create end-to-end', function () {
     function checkDefaultTemplate () {
         const pkg = requireFresh(path.join(project, 'package.json'));
         expect(pkg.author).toEqual('Apache Cordova Team');
+        expect(pkg.version).toEqual(appVersion);
 
         const configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.author()).toEqual('Apache Cordova Team');
+        expect(configXml.version()).toEqual(appVersion);
     }
 
     // Check that we did not use the default template
     function checkNotDefaultTemplate () {
         const configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.author()).not.toEqual('Apache Cordova Team');
-    }
-
-    function checkProjectCreatedWithFixtureTemplate () {
-        checkCommonArtifacts();
-        checkNoPackageJson();
-        checkNotDefaultTemplate();
+        expect(configXml.version()).toEqual('0.0.1');
     }
 
     function checkProjectCreatedWithDefaultTemplate () {
@@ -193,7 +188,9 @@ describe('create end-to-end', function () {
             }
         };
         return create(project, appId, appName, config, events)
-            .then(checkProjectCreatedWithFixtureTemplate);
+            .then(checkCommonArtifacts)
+            .then(checkNoPackageJson)
+            .then(checkNotDefaultTemplate);
     });
 
     it('should successfully run with local template having package.json in template dir', function () {

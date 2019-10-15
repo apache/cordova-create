@@ -32,8 +32,6 @@ var fetch = require('cordova-fetch');
 var CordovaError = require('cordova-common').CordovaError;
 var ConfigParser = require('cordova-common').ConfigParser;
 
-const DEFAULT_VERSION = '1.0.0';
-
 module.exports = cordovaCreateLegacyAdapter;
 
 /**
@@ -149,34 +147,29 @@ function cordovaCreate (dest, opts = {}) {
                 throw e;
             }
 
-            var pkgjsonPath = path.join(dir, 'package.json');
-            // Update package.json name and version fields
-            if (fs.existsSync(pkgjsonPath)) {
-                var pkgjson = requireFresh(pkgjsonPath);
+            // Write out id, name and version to config.xml
+            const configPath = path.join(dir, 'config.xml');
+            const conf = new ConfigParser(configPath);
 
-                // Pkjson.displayName should equal config's name.
-                if (opts.name) {
-                    pkgjson.displayName = opts.name;
-                }
-                // Pkjson.name should equal config's id.
-                if (opts.id) {
-                    pkgjson.name = opts.id.toLowerCase();
-                } else {
-                    // Use default name.
-                    pkgjson.name = 'helloworld';
-                }
+            conf.setPackageName(opts.id || conf.packageName() || 'com.example.cordova.app');
+            conf.setName(opts.name || conf.name() || 'Cordova Example App');
+            conf.setVersion(opts.version || conf.version() || '1.0.0');
 
-                pkgjson.version = DEFAULT_VERSION;
-                fs.writeFileSync(pkgjsonPath, JSON.stringify(pkgjson, null, 4), 'utf8');
-            }
-
-            // Write out id, name and default version to config.xml
-            var configPath = path.join(dir, 'config.xml');
-            var conf = new ConfigParser(configPath);
-            if (opts.id) conf.setPackageName(opts.id);
-            if (opts.name) conf.setName(opts.name);
-            conf.setVersion(DEFAULT_VERSION);
             conf.write();
+
+            // Copy values from config.xml to package.json
+            const pkgJsonPath = path.join(dir, 'package.json');
+            if (fs.existsSync(pkgJsonPath)) {
+                const pkgJson = requireFresh(pkgJsonPath);
+
+                Object.assign(pkgJson, {
+                    name: conf.packageName().toLowerCase(),
+                    displayName: conf.name(),
+                    version: conf.version()
+                });
+
+                fs.writeJsonSync(pkgJsonPath, pkgJson, { spaces: 4 });
+            }
         });
 }
 
