@@ -107,11 +107,6 @@ function cordovaCreate (dest, opts = {}) {
             // Finally, Ready to start!
             emit('log', 'Creating a new cordova project.');
 
-            // If symlink, don't fetch
-            if (opts.link) {
-                return opts.url;
-            }
-
             // Use cordova-fetch to obtain npm or git templates
             if (opts.template && isRemoteUri(opts.url)) {
                 var target = opts.url;
@@ -155,13 +150,7 @@ function cordovaCreate (dest, opts = {}) {
                     copyTemplateFiles(import_from_path, dir, isSubDir);
                 }
 
-                // If --link, link merges, hooks, www, and config.xml (and/or copy to root)
-                if (opts.link) {
-                    emit('verbose', 'Symlinking assets.');
-                    linkFromTemplate(import_from_path, dir);
-                }
-
-                // If following were not copied/linked from template, copy from stock app hello world
+                // If following were not copied from template, copy from stock app hello world
                 // TODO: get stock package.json if template does not contain package.json;
                 copyIfNotExists(stockAssetPath('www'), path.join(dir, 'www'));
                 copyIfNotExists(stockAssetPath('hooks'), path.join(dir, 'hooks'));
@@ -172,9 +161,6 @@ function cordovaCreate (dest, opts = {}) {
             } catch (e) {
                 if (!dirAlreadyExisted) {
                     fs.removeSync(dir);
-                }
-                if (process.platform.slice(0, 3) === 'win' && e.code === 'EPERM') {
-                    throw new CordovaError('Symlinks on Windows require Administrator privileges');
                 }
                 throw e;
             }
@@ -204,16 +190,13 @@ function cordovaCreate (dest, opts = {}) {
             fs.ensureDirSync(path.join(dir, 'platforms'));
             fs.ensureDirSync(path.join(dir, 'plugins'));
 
+            // Write out id, name and default version to config.xml
             var configPath = path.join(dir, 'config.xml');
-            // only update config.xml if not a symlink
-            if (!fs.lstatSync(configPath).isSymbolicLink()) {
-                // Write out id, name and default version to config.xml
-                var conf = new ConfigParser(configPath);
-                if (opts.id) conf.setPackageName(opts.id);
-                if (opts.name) conf.setName(opts.name);
-                conf.setVersion(DEFAULT_VERSION);
-                conf.write();
-            }
+            var conf = new ConfigParser(configPath);
+            if (opts.id) conf.setPackageName(opts.id);
+            if (opts.name) conf.setName(opts.name);
+            conf.setVersion(DEFAULT_VERSION);
+            conf.write();
         });
 }
 
@@ -284,48 +267,6 @@ function projectConfig (projectDir) {
         return wwwPath;
     }
     return false;
-}
-
-/**
- * Removes existing files and symlinks them if they exist.
- * Symlinks folders: www, merges, hooks
- * Symlinks file: config.xml (but only if it exists outside of the www folder)
- * If config.xml exists inside of template/www, COPY (not link) it to project/
- * */
-function linkFromTemplate (templateDir, projectDir) {
-    var linkSrc, linkDst, linkFolders, copySrc, copyDst;
-    function rmlinkSync (src, dst, type) {
-        if (src && dst) {
-            fs.removeSync(dst);
-            if (fs.existsSync(src)) {
-                fs.symlinkSync(src, dst, type);
-            }
-        }
-    }
-    // if template is a www dir
-    if (path.basename(templateDir) === 'www') {
-        linkSrc = path.resolve(templateDir);
-        linkDst = path.join(projectDir, 'www');
-        rmlinkSync(linkSrc, linkDst, 'dir');
-        copySrc = path.join(templateDir, 'config.xml');
-    } else {
-        linkFolders = ['www', 'merges', 'hooks'];
-        // Link each folder
-        for (var i = 0; i < linkFolders.length; i++) {
-            linkSrc = path.join(templateDir, linkFolders[i]);
-            linkDst = path.join(projectDir, linkFolders[i]);
-            rmlinkSync(linkSrc, linkDst, 'dir');
-        }
-        linkSrc = path.join(templateDir, 'config.xml');
-        linkDst = path.join(projectDir, 'config.xml');
-        rmlinkSync(linkSrc, linkDst, 'file');
-        copySrc = path.join(templateDir, 'www', 'config.xml');
-    }
-    // if template/www/config.xml then copy to project/config.xml
-    copyDst = path.join(projectDir, 'config.xml');
-    if (!fs.existsSync(copyDst) && fs.existsSync(copySrc)) {
-        fs.copySync(copySrc, copyDst);
-    }
 }
 
 function stockAssetPath (p) {
