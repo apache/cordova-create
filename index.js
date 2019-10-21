@@ -148,7 +148,7 @@ function cordovaCreate (dest, opts = {}) {
                     version: conf.version()
                 });
 
-                fs.writeJsonSync(pkgJsonPath, pkgJson, { spaces: 4 });
+                fs.writeJsonSync(pkgJsonPath, pkgJson, { spaces: 2 });
             }
         });
 }
