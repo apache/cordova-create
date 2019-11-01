@@ -43,14 +43,14 @@
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "jasmine": "^3.3.1",
+    "jasmine": "^3.5.0",
     "nyc": "^14.1.1",
     "rewire": "^4.0.1"
   },
   "scripts": {
     "test": "npm run eslint && npm run cover",
     "eslint": "eslint index.js spec/create.spec.js",
-    "jasmine": "jasmine spec/create.spec.js",
+    "jasmine": "jasmine \"spec/**/*.spec.js\"",
     "cover": "nyc -x spec/ npm run jasmine"
   },
   "contributors": [
