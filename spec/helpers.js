@@ -23,10 +23,6 @@ const path = require('path');
 
 const rewire = require('rewire');
 
-// Disable regular console output during tests
-const CordovaLogger = require('cordova-common').CordovaLogger;
-CordovaLogger.get().setLevel(CordovaLogger.ERROR);
-
 // Temporary directory to use for all tests
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cordova-create-tests-'));
 
