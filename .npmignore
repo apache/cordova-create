@@ -1,1 +1,4 @@
-spec/
+.*
+appveyor.yml
+spec
+coverage
