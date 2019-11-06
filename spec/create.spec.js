@@ -18,6 +18,7 @@
 */
 
 const fs = require('fs-extra');
+const rewire = require('rewire');
 
 var path = require('path');
 
@@ -225,5 +226,31 @@ describe('when shit happens', function () {
             create(project, opts),
             new CordovaError('not a valid template')
         );
+    });
+});
+
+describe('cordova create isRemoteUri', () => {
+    let isRemoteUri;
+
+    beforeEach(() => {
+        isRemoteUri = rewire('..').__get__('isRemoteUri');
+    });
+
+    it('should recognize URLs as remote', () => {
+        expect(isRemoteUri('https://example.com/pkg/foo')).toBe(true);
+    });
+
+    it('should recognize package@version as remote', () => {
+        const spec = 'foo@1';
+        spyOn(fs, 'existsSync').withArgs(spec).and.returnValue(false);
+
+        expect(isRemoteUri(spec)).toBe(true);
+    });
+
+    it('should not detect paths as remote only because they include an @', () => {
+        const spec = '../foo@1';
+        spyOn(fs, 'existsSync').withArgs(spec).and.returnValue(true);
+
+        expect(isRemoteUri(spec)).toBe(false);
     });
 });
