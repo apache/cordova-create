@@ -19,7 +19,7 @@
 #
 -->
 
-[![Build status](https://ci.appveyor.com/api/projects/status/a00hk739gm700dk4?svg=true)](https://ci.appveyor.com/project/Humbedooh/cordova-create) 
+[![Build status](https://ci.appveyor.com/api/projects/status/a00hk739gm700dk4?svg=true)](https://ci.appveyor.com/project/Humbedooh/cordova-create)
 [![Build Status](https://travis-ci.org/apache/cordova-create.svg?branch=master)](https://travis-ci.org/apache/cordova-create)
 
 # cordova-create
@@ -28,9 +28,8 @@ This module is used for creating cordova style projects. It also incudes support
 
 ## Usage:
 
-```
+```js
 const create = require('cordova-create');
-
 await create(dest, opts);
 ```
 
@@ -42,7 +41,7 @@ _Required_. Path to the destination where the project will be created. Must be a
 #### `opts`
 _Optional_. Supports following properties.
 
-```
+```js
 {
     // Attributes to be set in package.json & config.xml
     id: String,
