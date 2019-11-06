@@ -229,28 +229,22 @@ describe('when shit happens', function () {
     });
 });
 
-describe('cordova create isRemoteUri', () => {
-    let isRemoteUri;
+describe('cordova create needsToBeFetched', () => {
+    let needsToBeFetched;
 
     beforeEach(() => {
-        isRemoteUri = rewire('..').__get__('isRemoteUri');
+        needsToBeFetched = rewire('..').__get__('needsToBeFetched');
     });
 
     it('should recognize URLs as remote', () => {
-        expect(isRemoteUri('https://example.com/pkg/foo')).toBe(true);
+        expect(needsToBeFetched('https://example.com/pkg/foo')).toBe(true);
     });
 
     it('should recognize package@version as remote', () => {
-        const spec = 'foo@1';
-        spyOn(fs, 'existsSync').withArgs(spec).and.returnValue(false);
-
-        expect(isRemoteUri(spec)).toBe(true);
+        expect(needsToBeFetched('foo@1')).toBe(true);
     });
 
     it('should not detect paths as remote only because they include an @', () => {
-        const spec = '../foo@1';
-        spyOn(fs, 'existsSync').withArgs(spec).and.returnValue(true);
-
-        expect(isRemoteUri(spec)).toBe(false);
+        expect(needsToBeFetched('../foo@1')).toBe(false);
     });
 });

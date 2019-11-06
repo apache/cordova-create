@@ -88,7 +88,7 @@ function cordovaCreate (dest, opts = {}) {
             emit('log', 'Creating a new cordova project.');
 
             // Use cordova-fetch to obtain npm or git templates
-            if (isRemoteUri(opts.template)) {
+            if (needsToBeFetched(opts.template)) {
                 var target = opts.template;
                 emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, getSelfDestructingTempDir(), {});
@@ -167,6 +167,6 @@ function getSelfDestructingTempDir () {
     }).name;
 }
 
-function isRemoteUri (uri) {
+function needsToBeFetched (uri) {
     return npa(uri).type !== 'directory';
 }
