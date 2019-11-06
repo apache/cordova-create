@@ -22,7 +22,7 @@ const fs = require('fs-extra');
 var path = require('path');
 
 var tmp = require('tmp');
-var isUrl = require('is-url');
+const npa = require('npm-package-arg');
 var isObject = require('isobject');
 var pathIsInside = require('path-is-inside');
 var requireFresh = require('import-fresh');
@@ -88,7 +88,7 @@ function cordovaCreate (dest, opts = {}) {
             emit('log', 'Creating a new cordova project.');
 
             // Use cordova-fetch to obtain npm or git templates
-            if (isRemoteUri(opts.template)) {
+            if (needsToBeFetched(opts.template)) {
                 var target = opts.template;
                 emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, getSelfDestructingTempDir(), {});
@@ -167,6 +167,6 @@ function getSelfDestructingTempDir () {
     }).name;
 }
 
-function isRemoteUri (uri) {
-    return isUrl(uri) || uri.includes('@') || !fs.existsSync(uri);
+function needsToBeFetched (uri) {
+    return npa(uri).type !== 'directory';
 }
