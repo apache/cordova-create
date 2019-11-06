@@ -22,7 +22,7 @@ const fs = require('fs-extra');
 var path = require('path');
 
 var tmp = require('tmp');
-var isUrl = require('is-url');
+const npa = require('npm-package-arg');
 var isObject = require('isobject');
 var pathIsInside = require('path-is-inside');
 var requireFresh = require('import-fresh');
@@ -168,5 +168,5 @@ function getSelfDestructingTempDir () {
 }
 
 function isRemoteUri (uri) {
-    return isUrl(uri) || uri.includes('@') || !fs.existsSync(uri);
+    return npa(uri).type !== 'directory';
 }
