@@ -181,6 +181,33 @@ describe('create end-to-end', function () {
         return create(project, opts)
             .then(checkProjectCreatedWithDefaultTemplate);
     });
+
+    it('should rename all gitignore files in template to .gitignore', () => {
+        const baseTemplatePkg = path.join(__dirname, 'templates/withsubdirectory');
+        const templatePkg = path.join(tmpDir, 'gitignore-template');
+        fs.copySync(baseTemplatePkg, templatePkg);
+
+        // Setup a few gitignore files that should be renamed (or not)
+        const templateDir = path.join(templatePkg, 'template');
+        fs.ensureFileSync(path.join(templateDir, 'gitignore'));
+        fs.ensureFileSync(path.join(templateDir, 'www/gitignore'));
+        fs.ensureDirSync(path.join(templateDir, 'foo/gitignore'));
+
+        opts.template = templatePkg;
+        return create(project, opts).then(() => {
+            // Renames gitignore at template root
+            expect(path.join(project, 'gitignore')).not.toExist();
+            expect(path.join(project, '.gitignore')).toExist();
+
+            // Renames gitignores in sub-directories
+            expect(path.join(project, 'www/gitignore')).not.toExist();
+            expect(path.join(project, 'www/.gitignore')).toExist();
+
+            // Does not rename directories with name gitignore
+            expect(path.join(project, 'foo/gitignore')).toExist();
+            expect(path.join(project, 'foo/.gitignore')).not.toExist();
+        });
+    });
 });
 
 describe('when shit happens', function () {
