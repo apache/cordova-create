@@ -60,7 +60,6 @@ describe('cordova create checks for valid-identifier', function () {
 });
 
 describe('create end-to-end', function () {
-
     function checkCommonArtifacts () {
         // Check that www dir exist
         expect(path.join(project, 'www')).toExist();
