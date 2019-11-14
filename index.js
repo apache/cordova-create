@@ -127,22 +127,16 @@ function cordovaCreate (dest, opts = {}) {
                 }
                 throw e;
             }
-        })
-        .then(async () => {
+
             // It is impossible to deploy .gitignore files via npm packages.
             // Instead, Cordova templates should include gitignore files that we
             // rename to .gitignore here. For more details see
             // https://github.com/apache/cordova-discuss/issues/69
-            const undottedFiles = await globby(['**/gitignore'], {
-                cwd: dir,
-                absolute: true
-            });
+            globby.sync(['**/gitignore'], { cwd: dir, absolute: true })
+                .forEach(f =>
+                    fs.moveSync(f, path.join(path.dirname(f), '.gitignore'))
+                );
 
-            await Promise.all(undottedFiles.map(f =>
-                fs.move(f, path.join(path.dirname(f), '.gitignore'))
-            ));
-        })
-        .then(() => {
             // Write out id, name and version to config.xml
             const configPath = path.join(dir, 'config.xml');
             const conf = new ConfigParser(configPath);
