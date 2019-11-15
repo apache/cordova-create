@@ -24,10 +24,11 @@
     "node": ">=10"
   },
   "dependencies": {
-    "cordova-app-hello-world": "^4.0.0",
+    "cordova-app-hello-world": "github:apache/cordova-app-hello-world#4046a690e49f",
     "cordova-common": "^3.1.0",
     "cordova-fetch": "^2.0.0",
     "fs-extra": "^8.1.0",
+    "globby": "^10.0.1",
     "import-fresh": "^3.1.0",
     "isobject": "^4.0.0",
     "npm-package-arg": "^6.1.1",

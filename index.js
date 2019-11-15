@@ -23,6 +23,7 @@ var path = require('path');
 
 var tmp = require('tmp');
 const npa = require('npm-package-arg');
+const globby = require('globby');
 var isObject = require('isobject');
 var pathIsInside = require('path-is-inside');
 var requireFresh = require('import-fresh');
@@ -126,6 +127,15 @@ function cordovaCreate (dest, opts = {}) {
                 }
                 throw e;
             }
+
+            // It is impossible to deploy .gitignore files via npm packages.
+            // Instead, Cordova templates should include gitignore files that we
+            // rename to .gitignore here. For more details see
+            // https://github.com/apache/cordova-discuss/issues/69
+            globby.sync(['**/gitignore'], { cwd: dir, absolute: true })
+                .forEach(f =>
+                    fs.moveSync(f, path.join(path.dirname(f), '.gitignore'))
+                );
 
             // Write out id, name and version to config.xml
             const configPath = path.join(dir, 'config.xml');
