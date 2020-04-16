@@ -18,9 +18,7 @@
 */
 
 const fs = require('fs-extra');
-
 const path = require('path');
-
 const tmp = require('tmp');
 const npa = require('npm-package-arg');
 const globby = require('globby');
@@ -28,10 +26,8 @@ const isObject = require('isobject');
 const pathIsInside = require('path-is-inside');
 const requireFresh = require('import-fresh');
 const validateIdentifier = require('valid-identifier');
-
 const fetch = require('cordova-fetch');
-const CordovaError = require('cordova-common').CordovaError;
-const ConfigParser = require('cordova-common').ConfigParser;
+const { CordovaError, ConfigParser } = require('cordova-common');
 
 module.exports = cordovaCreate;
 

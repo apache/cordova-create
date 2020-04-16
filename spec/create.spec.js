@@ -19,14 +19,10 @@
 
 const fs = require('fs-extra');
 const rewire = require('rewire');
-
 const path = require('path');
-
 const requireFresh = require('import-fresh');
-
 const create = require('..');
-const CordovaError = require('cordova-common').CordovaError;
-const ConfigParser = require('cordova-common').ConfigParser;
+const { CordovaError, ConfigParser } = require('cordova-common');
 const { tmpDir, createWith, createWithMockFetch, expectRejection } = require('./helpers');
 
 const appName = 'TestBase';
