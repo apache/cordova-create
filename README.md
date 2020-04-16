@@ -19,10 +19,10 @@
 #
 -->
 
-[![Build status](https://ci.appveyor.com/api/projects/status/a00hk739gm700dk4?svg=true)](https://ci.appveyor.com/project/Humbedooh/cordova-create)
-[![Build Status](https://travis-ci.org/apache/cordova-create.svg?branch=master)](https://travis-ci.org/apache/cordova-create)
-
 # cordova-create
+
+[![Node CI](https://github.com/apache/cordova-create/workflows/Node%20CI/badge.svg?branch=master)](https://github.com/apache/cordova-create/actions?query=branch%3Amaster)
+[![codecov.io](https://codecov.io/github/apache/cordova-create/coverage.svg?branch=master)](https://codecov.io/github/apache/cordova-create?branch=master)
 
 This module is used for creating cordova style projects. It also incudes support for [cordova templates](http://cordova.apache.org/docs/en/latest/guide/cli/template.html). It can fetch templates from npm and git.
 
