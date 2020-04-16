@@ -19,8 +19,6 @@
 #
 -->
 
-[![Build status](https://ci.appveyor.com/api/projects/status/a00hk739gm700dk4?svg=true)](https://ci.appveyor.com/project/Humbedooh/cordova-create)
-
 # cordova-create
 
 This module is used for creating cordova style projects. It also incudes support for [cordova templates](http://cordova.apache.org/docs/en/latest/guide/cli/template.html). It can fetch templates from npm and git.
