@@ -19,19 +19,19 @@
 
 const fs = require('fs-extra');
 
-var path = require('path');
+const path = require('path');
 
-var tmp = require('tmp');
+const tmp = require('tmp');
 const npa = require('npm-package-arg');
 const globby = require('globby');
-var isObject = require('isobject');
-var pathIsInside = require('path-is-inside');
-var requireFresh = require('import-fresh');
-var validateIdentifier = require('valid-identifier');
+const isObject = require('isobject');
+const pathIsInside = require('path-is-inside');
+const requireFresh = require('import-fresh');
+const validateIdentifier = require('valid-identifier');
 
-var fetch = require('cordova-fetch');
-var CordovaError = require('cordova-common').CordovaError;
-var ConfigParser = require('cordova-common').ConfigParser;
+const fetch = require('cordova-fetch');
+const CordovaError = require('cordova-common').CordovaError;
+const ConfigParser = require('cordova-common').ConfigParser;
 
 module.exports = cordovaCreate;
 
@@ -90,7 +90,7 @@ function cordovaCreate (dest, opts = {}) {
 
             // Use cordova-fetch to obtain npm or git templates
             if (needsToBeFetched(opts.template)) {
-                var target = opts.template;
+                const target = opts.template;
                 emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, getSelfDestructingTempDir(), {});
             } else {
@@ -99,7 +99,7 @@ function cordovaCreate (dest, opts = {}) {
             }
         })
         .then(function (templatePath) {
-            var import_from_path;
+            let import_from_path;
 
             try {
                 import_from_path = requireFresh(templatePath).dirname;
@@ -112,7 +112,7 @@ function cordovaCreate (dest, opts = {}) {
                     import_from_path);
             }
 
-            var dirAlreadyExisted = fs.existsSync(dir);
+            const dirAlreadyExisted = fs.existsSync(dir);
             if (!dirAlreadyExisted) {
                 fs.mkdirSync(dir);
             }

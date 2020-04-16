@@ -20,13 +20,13 @@
 const fs = require('fs-extra');
 const rewire = require('rewire');
 
-var path = require('path');
+const path = require('path');
 
-var requireFresh = require('import-fresh');
+const requireFresh = require('import-fresh');
 
-var create = require('..');
-var CordovaError = require('cordova-common').CordovaError;
-var ConfigParser = require('cordova-common').ConfigParser;
+const create = require('..');
+const CordovaError = require('cordova-common').CordovaError;
+const ConfigParser = require('cordova-common').ConfigParser;
 const { tmpDir, createWith, createWithMockFetch, expectRejection } = require('./helpers');
 
 const appName = 'TestBase';
@@ -79,7 +79,7 @@ describe('create end-to-end', function () {
         expect(path.join(project, 'www', 'config.xml')).not.toExist();
 
         // Check that config.xml was updated correctly
-        var configXml = new ConfigParser(path.join(project, 'config.xml'));
+        const configXml = new ConfigParser(path.join(project, 'config.xml'));
         expect(configXml.packageName()).toEqual(appId);
         expect(configXml.name()).toEqual(appName);
     }
