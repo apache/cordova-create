@@ -21,12 +21,14 @@
 
 # cordova-create
 
+[![NPM](https://nodei.co/npm/cordova-create.png)](https://nodei.co/npm/cordova-create/)
+
 [![Node CI](https://github.com/apache/cordova-create/workflows/Node%20CI/badge.svg?branch=master)](https://github.com/apache/cordova-create/actions?query=branch%3Amaster)
 [![codecov.io](https://codecov.io/github/apache/cordova-create/coverage.svg?branch=master)](https://codecov.io/github/apache/cordova-create?branch=master)
 
-This module is used for creating cordova style projects. It also incudes support for [cordova templates](http://cordova.apache.org/docs/en/latest/guide/cli/template.html). It can fetch templates from npm and git.
+This module is used for creating Cordova style projects. It also incudes support for [Cordova App Templates](http://cordova.apache.org/docs/en/latest/guide/cli/template.html). It can fetch templates from npm and git.
 
-## Usage:
+## Usage
 
 ```js
 const create = require('cordova-create');
@@ -36,9 +38,11 @@ await create(dest, opts);
 ### Parameters
 
 #### `dest`
+
 _Required_. Path to the destination where the project will be created. Must be an empty dir if it exists.
 
 #### `opts`
+
 _Optional_. Supports following properties.
 
 ```js
