@@ -3,10 +3,8 @@
   "version": "3.0.0-dev",
   "description": "Apache Cordova create module. Creates new project from default or template",
   "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/apache/cordova-create.git"
-  },
+  "repository": "github:apache/cordova-create",
+  "bugs": "https://github.com/apache/cordova-create/issues",
   "keywords": [
     "cordova",
     "create",
@@ -16,10 +14,6 @@
   ],
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/apache/cordova-create/issues",
-    "email": "dev@cordova.apache.org"
-  },
   "engines": {
     "node": ">=10"
   },
