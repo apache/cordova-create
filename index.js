@@ -43,7 +43,7 @@ function cordovaCreate (dest, opts = {}) {
     // TODO this is to avoid having a huge diff. Remove later.
     let dir = dest;
 
-    return Promise.resolve().then(function () {
+    return Promise.resolve().then(() => {
         if (!dir) {
             throw new CordovaError('Directory not specified. See `cordova help`.');
         }
@@ -80,7 +80,7 @@ function cordovaCreate (dest, opts = {}) {
             );
         }
     })
-        .then(function () {
+        .then(() => {
             // Finally, Ready to start!
             emit('log', 'Creating a new cordova project.');
 
@@ -94,7 +94,7 @@ function cordovaCreate (dest, opts = {}) {
                 return path.resolve(opts.template);
             }
         })
-        .then(function (templatePath) {
+        .then(templatePath => {
             let import_from_path;
 
             try {

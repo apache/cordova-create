@@ -32,30 +32,30 @@ const project = path.join(tmpDir, appName);
 
 let opts;
 
-beforeEach(function () {
+beforeEach(() => {
     fs.emptyDirSync(tmpDir);
     opts = { name: appName, id: appId };
 });
-afterAll(function () {
+afterAll(() => {
     process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
     fs.removeSync(tmpDir);
 });
 
-describe('cordova create checks for valid-identifier', function () {
+describe('cordova create checks for valid-identifier', () => {
     const error = new CordovaError('is not a valid identifier');
 
-    it('should reject reserved words from start of id', function () {
+    it('should reject reserved words from start of id', () => {
         opts.id = 'int.bob';
         return expectRejection(create(project, opts), error);
     });
 
-    it('should reject reserved words from end of id', function () {
+    it('should reject reserved words from end of id', () => {
         opts.id = 'bob.class';
         return expectRejection(create(project, opts), error);
     });
 });
 
-describe('create end-to-end', function () {
+describe('create end-to-end', () => {
     function checkCommonArtifacts () {
         // Check that www dir exist
         expect(path.join(project, 'www')).toExist();
@@ -116,14 +116,14 @@ describe('create end-to-end', function () {
         checkDefaultTemplate();
     }
 
-    it('should successfully run without template and use default hello-world app', function () {
+    it('should successfully run without template and use default hello-world app', () => {
         // Create a real project with no template
         // use default cordova-app-hello-world app
         return create(project, opts)
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
-    it('should successfully run with Git URL', function () {
+    it('should successfully run with Git URL', () => {
         // Create a real project with git URL as template
         opts.template = 'https://github.com/apache/cordova-app-hello-world';
         return createWithMockFetch(project, opts)
@@ -134,7 +134,7 @@ describe('create end-to-end', function () {
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
-    it('should successfully run with NPM package (specific version)', function () {
+    it('should successfully run with NPM package (specific version)', () => {
         // Create a real project with npm module as template
         opts.template = 'phonegap-template-vue-f7-tabs@1';
         return createWithMockFetch(project, opts)
@@ -145,7 +145,7 @@ describe('create end-to-end', function () {
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
-    it('should successfully run with NPM package (no specific version)', function () {
+    it('should successfully run with NPM package (no specific version)', () => {
         // Create a real project with npm module as template
         opts.template = 'phonegap-template-vue-f7-tabs';
         return createWithMockFetch(project, opts)
@@ -156,7 +156,7 @@ describe('create end-to-end', function () {
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
-    it('should successfully run with local template having no package.json in template dir', function () {
+    it('should successfully run with local template having no package.json in template dir', () => {
         opts.template = path.join(__dirname, 'templates/withsubdirectory');
         return create(project, opts)
             .then(checkCommonArtifacts)
@@ -164,7 +164,7 @@ describe('create end-to-end', function () {
             .then(checkNotDefaultTemplate);
     });
 
-    it('should successfully run with local template having package.json in template dir', function () {
+    it('should successfully run with local template having package.json in template dir', () => {
         opts.template = path.join(__dirname, 'templates/withsubdirectory_package_json');
         return create(project, opts)
             .then(checkCommonArtifacts)
@@ -172,7 +172,7 @@ describe('create end-to-end', function () {
             .then(checkNotDefaultTemplate);
     });
 
-    it('should successfully run with existing, empty destination', function () {
+    it('should successfully run with existing, empty destination', () => {
         fs.ensureDirSync(project);
         return create(project, opts)
             .then(checkProjectCreatedWithDefaultTemplate);
@@ -206,22 +206,22 @@ describe('create end-to-end', function () {
     });
 });
 
-describe('when shit happens', function () {
-    it('should fail when dir is missing', function () {
+describe('when shit happens', () => {
+    it('should fail when dir is missing', () => {
         return expectRejection(
             create(null, opts),
             new CordovaError('Directory not specified')
         );
     });
 
-    it('should fail when dir already exists', function () {
+    it('should fail when dir already exists', () => {
         return expectRejection(
             create(__dirname, opts),
             new CordovaError('Path already exists and is not empty')
         );
     });
 
-    it('should fail when destination is inside template', function () {
+    it('should fail when destination is inside template', () => {
         opts.template = path.join(tmpDir, 'template');
         return expectRejection(
             create(path.join(opts.template, 'destination'), opts),
@@ -229,7 +229,7 @@ describe('when shit happens', function () {
         );
     });
 
-    it('should fail when fetch fails', function () {
+    it('should fail when fetch fails', () => {
         const fetchError = new Error('Fetch fail');
         const failingFetch = jasmine.createSpy('failingFetch')
             .and.callFake(() => Promise.reject(fetchError));
@@ -242,7 +242,7 @@ describe('when shit happens', function () {
     });
 
     // FIXME: we need to improve isRemote to make this different from the test above
-    xit('should fail when template does not exist', function () {
+    xit('should fail when template does not exist', () => {
         opts.template = path.join(__dirname, 'doesnotexist');
         return expectRejection(
             create(project, opts),

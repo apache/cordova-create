@@ -70,7 +70,7 @@ module.exports = {
 };
 
 // Add the toExist matcher.
-beforeEach(function () {
+beforeEach(() => {
     jasmine.addMatchers({
         toExist: function () {
             return {
