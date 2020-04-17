@@ -18,20 +18,16 @@
 */
 
 const fs = require('fs-extra');
-
-var path = require('path');
-
-var tmp = require('tmp');
+const path = require('path');
+const tmp = require('tmp');
 const npa = require('npm-package-arg');
 const globby = require('globby');
-var isObject = require('isobject');
-var pathIsInside = require('path-is-inside');
-var requireFresh = require('import-fresh');
-var validateIdentifier = require('valid-identifier');
-
-var fetch = require('cordova-fetch');
-var CordovaError = require('cordova-common').CordovaError;
-var ConfigParser = require('cordova-common').ConfigParser;
+const isObject = require('isobject');
+const pathIsInside = require('path-is-inside');
+const requireFresh = require('import-fresh');
+const validateIdentifier = require('valid-identifier');
+const fetch = require('cordova-fetch');
+const { CordovaError, ConfigParser } = require('cordova-common');
 
 module.exports = cordovaCreate;
 
@@ -47,7 +43,7 @@ function cordovaCreate (dest, opts = {}) {
     // TODO this is to avoid having a huge diff. Remove later.
     let dir = dest;
 
-    return Promise.resolve().then(function () {
+    return Promise.resolve().then(() => {
         if (!dir) {
             throw new CordovaError('Directory not specified. See `cordova help`.');
         }
@@ -84,13 +80,13 @@ function cordovaCreate (dest, opts = {}) {
             );
         }
     })
-        .then(function () {
+        .then(() => {
             // Finally, Ready to start!
             emit('log', 'Creating a new cordova project.');
 
             // Use cordova-fetch to obtain npm or git templates
             if (needsToBeFetched(opts.template)) {
-                var target = opts.template;
+                const target = opts.template;
                 emit('verbose', 'Using cordova-fetch for ' + target);
                 return fetch(target, getSelfDestructingTempDir(), {});
             } else {
@@ -98,8 +94,8 @@ function cordovaCreate (dest, opts = {}) {
                 return path.resolve(opts.template);
             }
         })
-        .then(function (templatePath) {
-            var import_from_path;
+        .then(templatePath => {
+            let import_from_path;
 
             try {
                 import_from_path = requireFresh(templatePath).dirname;
@@ -112,7 +108,7 @@ function cordovaCreate (dest, opts = {}) {
                     import_from_path);
             }
 
-            var dirAlreadyExisted = fs.existsSync(dir);
+            const dirAlreadyExisted = fs.existsSync(dir);
             if (!dirAlreadyExisted) {
                 fs.mkdirSync(dir);
             }

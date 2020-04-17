@@ -20,7 +20,6 @@
 const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
-
 const rewire = require('rewire');
 
 // Temporary directory to use for all tests
@@ -28,6 +27,7 @@ const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cordova-create-tests-'));
 
 // Returns a version of create with its local scope rewired
 const create = rewire('..');
+
 function createWith (rewiring) {
     return (...args) => create.__with__(rewiring)(() => create(...args));
 }
@@ -70,12 +70,12 @@ module.exports = {
 };
 
 // Add the toExist matcher.
-beforeEach(function () {
+beforeEach(() => {
     jasmine.addMatchers({
         toExist: function () {
             return {
                 compare: function (testPath) {
-                    var result = {};
+                    const result = {};
                     result.pass = fs.existsSync(testPath);
 
                     if (result.pass) {

@@ -17,7 +17,8 @@
     under the License.
 */
 
-var path = require('path');
+const path = require('path');
+
 module.exports = {
     'dirname': path.join(__dirname, 'template')
 };
