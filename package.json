@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "cordova-app-hello-world": "^5.0.0",
-    "cordova-common": "^4.0.0",
+    "cordova-common": "^4.0.1",
     "cordova-fetch": "^3.0.0",
     "fs-extra": "^9.0.0",
     "globby": "^11.0.0",
@@ -27,7 +27,7 @@
     "isobject": "^4.0.0",
     "npm-package-arg": "^8.0.1",
     "path-is-inside": "^1.0.2",
-    "tmp": "^0.1.0",
+    "tmp": "^0.2.1",
     "valid-identifier": "0.0.2"
   },
   "devDependencies": {
