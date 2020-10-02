@@ -42,16 +42,6 @@
     "jasmine": "jasmine \"spec/**/*.spec.js\"",
     "cover": "nyc npm run jasmine"
   },
-  "contributors": [
-    {
-      "name": "Caryn Tran",
-      "email": "caryn.tran@berkeley.edu"
-    },
-    {
-      "name": "Steve Gill",
-      "email": "stevengill97@gmail.com"
-    }
-  ],
   "nyc": {
     "include": [
       "index.js"
