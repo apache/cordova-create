@@ -18,22 +18,22 @@
     "node": ">=10"
   },
   "dependencies": {
-    "cordova-app-hello-world": "^5.0.0",
-    "cordova-common": "^4.0.1",
-    "cordova-fetch": "^3.0.0",
-    "fs-extra": "^9.0.0",
-    "globby": "^11.0.0",
-    "import-fresh": "^3.2.1",
+    "cordova-app-hello-world": "^6.0.0",
+    "cordova-common": "^4.0.2",
+    "cordova-fetch": "^3.0.1",
+    "fs-extra": "^10.0.0",
+    "globby": "^11.0.4",
+    "import-fresh": "^3.3.0",
     "isobject": "^4.0.0",
-    "npm-package-arg": "^8.0.1",
+    "npm-package-arg": "^8.1.5",
     "path-is-inside": "^1.0.2",
     "tmp": "^0.2.1",
     "valid-identifier": "0.0.2"
   },
   "devDependencies": {
-    "@cordova/eslint-config": "^3.0.0",
-    "jasmine": "^3.5.0",
-    "nyc": "^15.0.1",
+    "@cordova/eslint-config": "^4.0.0",
+    "jasmine": "^3.10.0",
+    "nyc": "^15.1.0",
     "rewire": "^5.0.0"
   },
   "scripts": {
