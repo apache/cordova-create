@@ -20,6 +20,15 @@
 -->
 # Cordova-create Release Notes
 
+### 4.0.0 (Nov 30, 2021)
+
+* [GH-68](https://github.com/apache/cordova-create/pull/68) dep!: update all dependencies
+  * `cordova-app-hello-world@^6.0.0`
+  * `cordova-common@^4.0.2`
+  * `cordova-fetch@^3.0.1`
+* [GH-67](https://github.com/apache/cordova-create/pull/67) chore: clean up `package.json`
+* [GH-66](https://github.com/apache/cordova-create/pull/66) ci: add node 14 to workflow
+
 ### 3.0.0 (May 19, 2020)
 
 * [GH-65](https://github.com/apache/cordova-create/pull/65) chore(`npm`): bump dependencies w/ rebuilt `package-lock`
