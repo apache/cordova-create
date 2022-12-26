@@ -20,6 +20,16 @@
 -->
 # Cordova-create Release Notes
 
+### 4.1.0 (Dec 26, 2022)
+
+* [GH-73](https://github.com/apache/cordova-create/pull/73) dep(npm): bump dependencies to latest minor/patch & rebuild package-lock
+  * `cordova-common@^4.1.0`
+  * `cordova-fetch@^3.1.0`
+  * `fs-extra@^10.1.0`
+  * `globby@^11.1.0`
+  * `jasmine@^3.99.0`
+* [GH-74](https://github.com/apache/cordova-create/pull/74) ci(workflow): update node support & action dependencies
+
 ### 4.0.0 (Nov 30, 2021)
 
 * [GH-68](https://github.com/apache/cordova-create/pull/68) dep!: update all dependencies
