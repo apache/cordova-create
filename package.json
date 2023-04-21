@@ -15,26 +15,26 @@
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=10"
+    "node": ">=16.13.0"
   },
   "dependencies": {
     "cordova-app-hello-world": "^6.0.0",
-    "cordova-common": "^4.1.0",
-    "cordova-fetch": "^3.1.0",
-    "fs-extra": "^10.1.0",
+    "cordova-common": "^5.0.0",
+    "cordova-fetch": "^4.0.0",
+    "fs-extra": "^11.1.1",
     "globby": "^11.1.0",
     "import-fresh": "^3.3.0",
     "isobject": "^4.0.0",
-    "npm-package-arg": "^8.1.5",
+    "npm-package-arg": "^10.1.0",
     "path-is-inside": "^1.0.2",
     "tmp": "^0.2.1",
     "valid-identifier": "0.0.2"
   },
   "devDependencies": {
-    "@cordova/eslint-config": "^4.0.0",
-    "jasmine": "^3.99.0",
+    "@cordova/eslint-config": "^5.0.0",
+    "jasmine": "^4.6.0",
     "nyc": "^15.1.0",
-    "rewire": "^5.0.0"
+    "rewire": "^6.0.0"
   },
   "scripts": {
     "test": "npm run lint && npm run cover",
