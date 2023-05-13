@@ -20,6 +20,20 @@
 -->
 # Cordova-create Release Notes
 
+### 5.0.0 (May 13, 2023)
+
+* [GH-82](https://github.com/apache/cordova-create/pull/82) dep!: packages upgrade & requirements
+  * Bumped Packages
+    * `@cordova/eslint-config@latest@5.0.0`
+    * `cordova-common@5.0.0`
+    * `cordova-fetch@4.0.0`
+    * `fs-extra@11.1.1`
+    * `jasmine@4.6.0`
+    * `rewire@6.0.0`
+    * `npm-package-arg@10.1.0`
+  * Rebuilt `package-lock.json`
+  * Bumped `node` engine requirement `>=16.13.0`
+
 ### 4.1.0 (Dec 26, 2022)
 
 * [GH-73](https://github.com/apache/cordova-create/pull/73) dep(npm): bump dependencies to latest minor/patch & rebuild package-lock
