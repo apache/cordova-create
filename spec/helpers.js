@@ -17,9 +17,9 @@
     under the License.
 */
 
-const fs = require('fs-extra');
-const os = require('os');
-const path = require('path');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 const rewire = require('rewire');
 
 // Temporary directory to use for all tests
@@ -39,7 +39,7 @@ function createWithMockFetch (dir, id, name, cfg, events) {
     const fetchSpy = jasmine.createSpy('fetchSpy')
         .and.callFake(() => Promise.resolve(mockFetchDest));
 
-    fs.copySync(templateDir, mockFetchDest);
+    fs.cpSync(templateDir, mockFetchDest, { recursive: true });
     return createWith({ fetch: fetchSpy })(dir, id, name, cfg, events)
         .then(() => fetchSpy);
 }

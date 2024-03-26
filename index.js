@@ -17,8 +17,8 @@
     under the License.
 */
 
-const fs = require('fs-extra');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const tmp = require('tmp');
 const npa = require('npm-package-arg');
 const globby = require('globby');
@@ -116,10 +116,10 @@ function cordovaCreate (dest, opts = {}) {
             try {
                 // Copy files from template to project
                 emit('verbose', 'Copying assets.');
-                fs.copySync(import_from_path, dir);
+                fs.cpSync(import_from_path, dir, { recursive: true });
             } catch (e) {
                 if (!dirAlreadyExisted) {
-                    fs.removeSync(dir);
+                    fs.rmSync(dir, { recursive: true, force: true });
                 }
                 throw e;
             }
@@ -130,7 +130,7 @@ function cordovaCreate (dest, opts = {}) {
             // https://github.com/apache/cordova-discuss/issues/69
             globby.sync(['**/gitignore'], { cwd: dir, absolute: true })
                 .forEach(f =>
-                    fs.moveSync(f, path.join(path.dirname(f), '.gitignore'))
+                    fs.renameSync(f, path.join(path.dirname(f), '.gitignore'))
                 );
 
             // Write out id, name and version to config.xml
@@ -154,7 +154,8 @@ function cordovaCreate (dest, opts = {}) {
                     version: conf.version()
                 });
 
-                fs.writeJsonSync(pkgJsonPath, pkgJson, { spaces: 2 });
+                const jsonStr = JSON.stringify(pkgJson, null, 2);
+                fs.writeFileSync(pkgJsonPath, `${jsonStr}\n`, 'utf8');
             }
         });
 }
