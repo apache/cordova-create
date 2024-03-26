@@ -21,7 +21,6 @@
     "cordova-app-hello-world": "^6.0.0",
     "cordova-common": "^5.0.0",
     "cordova-fetch": "^4.0.0",
-    "fs-extra": "^11.1.1",
     "globby": "^11.1.0",
     "import-fresh": "^3.3.0",
     "isobject": "^4.0.0",
