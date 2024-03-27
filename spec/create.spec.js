@@ -17,9 +17,9 @@
     under the License.
 */
 
-const fs = require('fs-extra');
+const fs = require('node:fs');
 const rewire = require('rewire');
-const path = require('path');
+const path = require('node:path');
 const requireFresh = require('import-fresh');
 const create = require('..');
 const { CordovaError, ConfigParser } = require('cordova-common');
@@ -33,12 +33,15 @@ const project = path.join(tmpDir, appName);
 let opts;
 
 beforeEach(() => {
-    fs.emptyDirSync(tmpDir);
+    if (fs.existsSync(tmpDir)) {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(tmpDir, { recursive: true });
     opts = { name: appName, id: appId };
 });
 afterAll(() => {
     process.chdir(path.join(__dirname, '..')); // Needed to rm the dir on Windows.
-    fs.removeSync(tmpDir);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 describe('cordova create checks for valid-identifier', () => {
@@ -157,7 +160,7 @@ describe('create end-to-end', () => {
     });
 
     it('should successfully run with local template having no package.json in template dir', () => {
-        opts.template = path.join(__dirname, 'templates/withsubdirectory');
+        opts.template = path.join(__dirname, 'templates', 'withsubdirectory');
         return create(project, opts)
             .then(checkCommonArtifacts)
             .then(checkNoPackageJson)
@@ -165,7 +168,7 @@ describe('create end-to-end', () => {
     });
 
     it('should successfully run with local template having package.json in template dir', () => {
-        opts.template = path.join(__dirname, 'templates/withsubdirectory_package_json');
+        opts.template = path.join(__dirname, 'templates', 'withsubdirectory_package_json');
         return create(project, opts)
             .then(checkCommonArtifacts)
             .then(checkPackageJson)
@@ -173,21 +176,22 @@ describe('create end-to-end', () => {
     });
 
     it('should successfully run with existing, empty destination', () => {
-        fs.ensureDirSync(project);
+        fs.mkdirSync(project, { recursive: true });
         return create(project, opts)
             .then(checkProjectCreatedWithDefaultTemplate);
     });
 
     it('should rename all gitignore files in template to .gitignore', () => {
-        const baseTemplatePkg = path.join(__dirname, 'templates/withsubdirectory');
+        const baseTemplatePkg = path.join(__dirname, 'templates', 'withsubdirectory');
         const templatePkg = path.join(tmpDir, 'gitignore-template');
-        fs.copySync(baseTemplatePkg, templatePkg);
+        fs.cpSync(baseTemplatePkg, templatePkg, { recursive: true });
 
         // Setup a few gitignore files that should be renamed (or not)
         const templateDir = path.join(templatePkg, 'template');
-        fs.ensureFileSync(path.join(templateDir, 'gitignore'));
-        fs.ensureFileSync(path.join(templateDir, 'www/gitignore'));
-        fs.ensureDirSync(path.join(templateDir, 'foo/gitignore'));
+        fs.mkdirSync(path.join(templateDir, 'www'), { recursive: true });
+        fs.writeFileSync(path.join(templateDir, 'gitignore'), '', 'utf8');
+        fs.writeFileSync(path.join(templateDir, 'www', 'gitignore'), '', 'utf8');
+        fs.mkdirSync(path.join(templateDir, 'foo', 'gitignore'), { recursive: true });
 
         opts.template = templatePkg;
         return create(project, opts).then(() => {
@@ -196,12 +200,12 @@ describe('create end-to-end', () => {
             expect(path.join(project, '.gitignore')).toExist();
 
             // Renames gitignores in sub-directories
-            expect(path.join(project, 'www/gitignore')).not.toExist();
-            expect(path.join(project, 'www/.gitignore')).toExist();
+            expect(path.join(project, 'www', 'gitignore')).not.toExist();
+            expect(path.join(project, 'www', '.gitignore')).toExist();
 
             // Does not rename directories with name gitignore
-            expect(path.join(project, 'foo/gitignore')).toExist();
-            expect(path.join(project, 'foo/.gitignore')).not.toExist();
+            expect(path.join(project, 'foo', 'gitignore')).toExist();
+            expect(path.join(project, 'foo', '.gitignore')).not.toExist();
         });
     });
 });
