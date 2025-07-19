@@ -15,22 +15,5 @@
 # specific language governing permissions and limitations
 # under the License.
 
-node_modules
-npm-debug.log
-.idea/*
-*.jar
-.*.swp
-._*
-.DS_Store
-.git
-.hg
-.npmrc
-.lock-wscript
-.svn
-.wafpickle-*
-config.gypi
-CVS
-node_modules/*
-node_module/.bin/*
-.nyc_output/
-coverage/
+ignored-packages:
+  - spdx-exceptions@2.5.0
