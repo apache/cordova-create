@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "cordova-app-hello-world": "^6.0.0",
-    "cordova-common": "^5.0.0",
+    "cordova-common": "^5.0.1",
     "cordova-fetch": "^4.0.0",
     "globby": "^11.1.0",
     "import-fresh": "^3.3.0",
@@ -30,7 +30,7 @@
     "valid-identifier": "0.0.2"
   },
   "devDependencies": {
-    "@cordova/eslint-config": "^5.0.0",
+    "@cordova/eslint-config": "^5.1.0",
     "jasmine": "^4.6.0",
     "nyc": "^15.1.0",
     "rewire": "^6.0.0"
