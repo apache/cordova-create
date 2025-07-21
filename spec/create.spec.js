@@ -238,7 +238,7 @@ describe('when shit happens', () => {
         const failingFetch = jasmine.createSpy('failingFetch')
             .and.callFake(() => Promise.reject(fetchError));
 
-        opts.template = 'http://localhost:123456789/cordova-create';
+        opts.template = 'http://localhost:12345/cordova-create';
         return expectRejection(
             createWith({ fetch: failingFetch })(project, opts),
             fetchError
