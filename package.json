@@ -18,7 +18,7 @@
     "node": ">=20.5.0"
   },
   "dependencies": {
-    "cordova-app-hello-world": "^6.0.0",
+    "cordova-app-hello-world": "^7.0.0",
     "cordova-common": "^5.0.1",
     "cordova-fetch": "^4.0.0",
     "globby": "^11.1.0",
