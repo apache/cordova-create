@@ -15,7 +15,7 @@
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=20.5.0"
+    "node": ">=20.17.0 || >=22.9.0"
   },
   "dependencies": {
     "cordova-app-hello-world": "^7.0.0",
@@ -24,7 +24,7 @@
     "globby": "^11.1.0",
     "import-fresh": "^3.3.1",
     "isobject": "^4.0.0",
-    "npm-package-arg": "^12.0.2",
+    "npm-package-arg": "^13.0.0",
     "path-is-inside": "^1.0.2",
     "tmp": "^0.2.5",
     "valid-identifier": "0.0.2"
