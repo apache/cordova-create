@@ -33,7 +33,7 @@
     "@cordova/eslint-config": "^5.1.0",
     "jasmine": "^5.8.0",
     "nyc": "^17.1.0",
-    "rewire": "^9.0.0"
+    "rewire": "^9.0.1"
   },
   "scripts": {
     "test": "npm run lint && npm run cover",
