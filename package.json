@@ -26,7 +26,7 @@
     "isobject": "^4.0.0",
     "npm-package-arg": "^12.0.2",
     "path-is-inside": "^1.0.2",
-    "tmp": "^0.2.3",
+    "tmp": "^0.2.5",
     "valid-identifier": "0.0.2"
   },
   "devDependencies": {
