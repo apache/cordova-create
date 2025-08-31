@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "cordova-app-hello-world": "^7.0.0",
-    "cordova-common": "^5.0.1",
+    "cordova-common": "^6.0.0",
     "cordova-fetch": "^4.0.0",
     "globby": "^11.1.0",
     "import-fresh": "^3.3.1",
