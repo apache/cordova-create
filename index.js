@@ -137,8 +137,8 @@ function cordovaCreate (dest, opts = {}) {
             const configPath = path.join(dir, 'config.xml');
             const conf = new ConfigParser(configPath);
 
-            conf.setPackageName(opts.id || conf.packageName() || 'com.example.cordova.app');
-            conf.setName(opts.name || conf.name() || 'Cordova Example App');
+            conf.setPackageName(opts.id || conf.packageName() || 'org.apache.cordova.hellocordova');
+            conf.setName(opts.name || conf.name() || 'Hello Cordova');
             conf.setVersion(opts.version || conf.version() || '1.0.0');
 
             conf.write();
