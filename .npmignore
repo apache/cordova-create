@@ -19,3 +19,7 @@
 spec
 coverage
 eslint.config.js
+licence_checker.yml
+
+# Output of 'npm pack'
+*.tgz
