@@ -21,9 +21,10 @@
 
 # cordova-create
 
-[![NPM](https://nodei.co/npm/cordova-create.png)](https://nodei.co/npm/cordova-create/)
+[![NPM](https://nodei.co/npm/cordova-create.svg?style=flat&data=n,v,u&color=blue)](https://www.npmjs.com/package/cordova-create)
 
-[![Node CI](https://github.com/apache/cordova-create/workflows/Node%20CI/badge.svg?branch=master)](https://github.com/apache/cordova-create/actions?query=branch%3Amaster)
+[![Node CI](https://github.com/apache/cordova-create/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/apache/cordova-create/actions/workflows/ci.yml?query=branch%3Amaster)
+[![Release Audit](https://github.com/apache/cordova-create/actions/workflows/release-audit.yml/badge.svg?branch=master)](https://github.com/apache/cordova-create/actions/workflows/release-audit.yml?query=branch%3Amaster)
 [![codecov.io](https://codecov.io/github/apache/cordova-create/coverage.svg?branch=master)](https://codecov.io/github/apache/cordova-create?branch=master)
 
 This module is used for creating Cordova style projects. It also incudes support for [Cordova App Templates](http://cordova.apache.org/docs/en/latest/guide/cli/template.html). It can fetch templates from npm and git.
