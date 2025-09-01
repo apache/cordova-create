@@ -30,7 +30,7 @@
     "valid-identifier": "0.0.2"
   },
   "devDependencies": {
-    "@cordova/eslint-config": "^5.1.0",
+    "@cordova/eslint-config": "^6.0.0",
     "jasmine": "^5.10.0",
     "nyc": "^17.1.0",
     "rewire": "^9.0.1"

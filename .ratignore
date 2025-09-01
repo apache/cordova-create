@@ -16,6 +16,5 @@
 # under the License.
 
 .git
-.eslintignore
 coverage
 node_modules
