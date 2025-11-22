@@ -15,6 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-.git
-coverage
-node_modules
+.git/
+coverage/
+node_modules/
